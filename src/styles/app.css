@@ -1,0 +1,162 @@
+@import 'tailwindcss';
+
+/* Custom theme using CSS custom properties */
+@theme {
+  /* Background colors */
+  --color-background: hsl(40 20% 98%);
+  --color-foreground: hsl(20 14.3% 4.1%);
+
+  /* Card colors */
+  --color-card: hsl(0 0% 100%);
+  --color-card-foreground: hsl(20 14.3% 4.1%);
+
+  /* Popover colors */
+  --color-popover: hsl(0 0% 100%);
+  --color-popover-foreground: hsl(20 14.3% 4.1%);
+
+  /* Primary colors - warm orange */
+  --color-primary: hsl(24 75% 50%);
+  --color-primary-foreground: hsl(60 9.1% 97.8%);
+
+  /* Secondary colors */
+  --color-secondary: hsl(40 30% 92%);
+  --color-secondary-foreground: hsl(24 9.8% 20%);
+
+  /* Muted colors */
+  --color-muted: hsl(40 20% 94%);
+  --color-muted-foreground: hsl(25 5.3% 44.7%);
+
+  /* Accent colors */
+  --color-accent: hsl(32 60% 94%);
+  --color-accent-foreground: hsl(24 9.8% 20%);
+
+  /* Destructive colors */
+  --color-destructive: hsl(0 84.2% 60.2%);
+  --color-destructive-foreground: hsl(60 9.1% 97.8%);
+
+  /* Border and input colors */
+  --color-border: hsl(30 15% 88%);
+  --color-input: hsl(30 15% 88%);
+  --color-ring: hsl(24 75% 50%);
+
+  /* Border radius */
+  --radius-lg: 0.5rem;
+  --radius-md: calc(0.5rem - 2px);
+  --radius-sm: calc(0.5rem - 4px);
+}
+
+/* Dark mode colors */
+.dark {
+  --color-background: hsl(20 14.3% 4.1%);
+  --color-foreground: hsl(40 20% 98%);
+  --color-card: hsl(20 14.3% 6%);
+  --color-card-foreground: hsl(40 20% 98%);
+  --color-popover: hsl(20 14.3% 6%);
+  --color-popover-foreground: hsl(40 20% 98%);
+  --color-primary: hsl(24 75% 55%);
+  --color-primary-foreground: hsl(20 14.3% 4.1%);
+  --color-secondary: hsl(20 14.3% 12%);
+  --color-secondary-foreground: hsl(40 20% 98%);
+  --color-muted: hsl(20 14.3% 12%);
+  --color-muted-foreground: hsl(40 5% 64.9%);
+  --color-accent: hsl(20 14.3% 12%);
+  --color-accent-foreground: hsl(40 20% 98%);
+  --color-destructive: hsl(0 62.8% 50.6%);
+  --color-destructive-foreground: hsl(40 20% 98%);
+  --color-border: hsl(20 14.3% 16%);
+  --color-input: hsl(20 14.3% 16%);
+  --color-ring: hsl(24 75% 55%);
+}
+
+@layer base {
+  html {
+    color-scheme: light dark;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-muted;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-muted-foreground/30 rounded-full;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-muted-foreground/50;
+}
+
+/* Markdown content styling */
+.prose-recap h1 {
+  @apply text-2xl font-bold mt-6 mb-4 text-foreground;
+}
+
+.prose-recap h2 {
+  @apply text-xl font-semibold mt-5 mb-3 text-foreground;
+}
+
+.prose-recap h3 {
+  @apply text-lg font-medium mt-4 mb-2 text-foreground;
+}
+
+.prose-recap p {
+  @apply my-3 leading-relaxed;
+}
+
+.prose-recap ul {
+  @apply list-disc pl-6 my-3 space-y-1;
+}
+
+.prose-recap ol {
+  @apply list-decimal pl-6 my-3 space-y-1;
+}
+
+.prose-recap li {
+  @apply leading-relaxed;
+}
+
+.prose-recap strong {
+  @apply font-semibold text-foreground;
+}
+
+.prose-recap em {
+  @apply italic;
+}
+
+.prose-recap blockquote {
+  @apply border-l-4 border-primary/50 pl-4 italic my-4 text-muted-foreground;
+}
+
+/* Streaming text animation */
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+.streaming-cursor::after {
+  content: '\25CB';
+  animation: blink 1s infinite;
+  @apply text-primary ml-0.5;
+}
+
+/* Ring offset background for focus states */
+@layer utilities {
+  .ring-offset-background {
+    --tw-ring-offset-color: var(--color-background);
+  }
+}

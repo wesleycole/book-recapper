@@ -1,12 +1,14 @@
+/// <reference types="vite/client" />
 import {
+  HeadContent,
+  Link,
   Outlet,
-  ScrollRestoration,
+  Scripts,
   createRootRoute,
 } from '@tanstack/react-router'
-import { Meta, Scripts } from '@tanstack/start'
-import { Link } from '@tanstack/react-router'
+import * as React from 'react'
 import { BookOpen, Library, Clock } from 'lucide-react'
-import appCss from '~/styles.css?url'
+import appCss from '~/styles/app.css?url'
 
 export const Route = createRootRoute({
   head: () => ({
@@ -27,14 +29,14 @@ export const Route = createRootRoute({
       },
     ],
   }),
-  component: RootComponent,
+  shellComponent: RootDocument,
 })
 
-function RootComponent() {
+function RootDocument({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
       <head>
-        <Meta />
+        <HeadContent />
       </head>
       <body className="min-h-screen bg-background font-sans antialiased">
         <div className="flex min-h-screen flex-col">
@@ -70,13 +72,12 @@ function RootComponent() {
             </div>
           </header>
           <main className="flex-1">
-            <Outlet />
+            {children}
           </main>
           <footer className="border-t py-6 text-center text-sm text-muted-foreground">
             <p>Book Recapper - Never forget what happened in your favorite series</p>
           </footer>
         </div>
-        <ScrollRestoration />
         <Scripts />
       </body>
     </html>

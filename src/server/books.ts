@@ -1,8 +1,8 @@
-import { createServerFn } from '@tanstack/start'
+import { createServerFn } from '@tanstack/react-start'
 import { searchBooks, searchSeries, getBookDetails } from '~/lib/openlib'
 
 export const searchBooksServer = createServerFn({ method: 'GET' })
-  .validator((query: string) => query)
+  .inputValidator((query: string) => query)
   .handler(async ({ data: query }) => {
     if (!query || query.length < 2) {
       return []
@@ -11,7 +11,7 @@ export const searchBooksServer = createServerFn({ method: 'GET' })
   })
 
 export const searchSeriesServer = createServerFn({ method: 'GET' })
-  .validator((query: string) => query)
+  .inputValidator((query: string) => query)
   .handler(async ({ data: query }) => {
     if (!query || query.length < 2) {
       return []
@@ -20,7 +20,7 @@ export const searchSeriesServer = createServerFn({ method: 'GET' })
   })
 
 export const getBookDetailsServer = createServerFn({ method: 'GET' })
-  .validator((workKey: string) => workKey)
+  .inputValidator((workKey: string) => workKey)
   .handler(async ({ data: workKey }) => {
     return getBookDetails(workKey)
   })
