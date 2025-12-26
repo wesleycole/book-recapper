@@ -54,8 +54,8 @@ function HomePage() {
       try {
         const results = await Promise.all(
           INITIAL_BOOKS.map(async (title) => {
-            const result = await searchBooksServer({ data: { query: title } })
-            return result.books[0] || null
+            const result = await searchBooksServer({ data: title })
+            return result[0] || null
           })
         )
         setBookSuggestions(results.filter((book): book is BookDetails => book !== null))
@@ -78,8 +78,8 @@ function HomePage() {
     try {
       const results = await Promise.all(
         booksToLoad.map(async (title) => {
-          const result = await searchBooksServer({ data: { query: title } })
-          return result.books[0] || null
+          const result = await searchBooksServer({ data: title })
+          return result[0] || null
         })
       )
       const newBooks = results.filter((book): book is BookDetails => book !== null)
