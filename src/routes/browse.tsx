@@ -226,14 +226,14 @@ function BrowsePage() {
                 </p>
                 <div className="flex flex-wrap gap-2">
                   {[
-                    'Stormlight Archive',
-                    'Wheel of Time',
-                    'Mistborn',
-                    'A Song of Ice and Fire',
-                    'The Expanse',
-                    'Dune',
                     'Harry Potter',
-                    'Lord of the Rings',
+                    'The Hunger Games',
+                    'Sherlock Holmes',
+                    'Jack Reacher',
+                    'Outlander',
+                    'The Handmaid\'s Tale',
+                    'The Girl with the Dragon Tattoo',
+                    'Percy Jackson',
                   ].map((term) => (
                     <Button
                       key={term}
