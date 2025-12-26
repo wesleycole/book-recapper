@@ -1,0 +1,24 @@
+# Dependencies
+node_modules/
+
+# Build output
+.output/
+.vinxi/
+dist/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Turso
+*.db
+*.db-journal
