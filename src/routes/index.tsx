@@ -197,10 +197,22 @@ function HomePage() {
         <div className="relative z-10 w-full max-w-4xl">
           {/* Hero content - centered */}
           <div className="text-center">
-            <h1 className="font-serif text-4xl font-light tracking-tight text-foreground sm:text-5xl">
+            <h1
+              className="font-serif text-5xl font-bold tracking-tight sm:text-6xl"
+              style={{
+                color: '#d4a84b',
+                textShadow: '1px 1px 2px rgba(0,0,0,0.3), 0 0 20px rgba(212,168,75,0.2)',
+              }}
+            >
               Rediscover <span className="italic">Your</span> Books
             </h1>
-            <p className="mt-4 text-lg text-muted-foreground">
+            <p
+              className="mt-4 text-xl font-medium"
+              style={{
+                color: '#c9a227',
+                textShadow: '1px 1px 2px rgba(0,0,0,0.3)',
+              }}
+            >
               Get AI-powered recaps to refresh your memory before the next chapter
             </p>
           </div>
