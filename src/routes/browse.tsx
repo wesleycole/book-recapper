@@ -13,10 +13,34 @@ export const Route = createFileRoute('/browse')({
   component: BrowsePage,
 })
 
+// Random genres to select from for initial page load
+const RANDOM_GENRES = [
+  'fantasy',
+  'science fiction',
+  'mystery',
+  'thriller',
+  'romance',
+  'historical fiction',
+  'horror',
+  'adventure',
+  'detective',
+  'dystopian',
+  'crime',
+  'magic',
+  'space opera',
+  'urban fantasy',
+  'epic fantasy',
+  'psychological thriller',
+  'cozy mystery',
+  'contemporary romance',
+  'paranormal',
+  'steampunk',
+]
+
 function BrowsePage() {
   const navigate = useNavigate()
   const [searchQuery, setSearchQuery] = useState('')
-  const [isLoading, setIsLoading] = useState(false)
+  const [isLoading, setIsLoading] = useState(true) // Start with loading true for initial load
   const [isLoadingMore, setIsLoadingMore] = useState(false)
   const [results, setResults] = useState<BookDetails[]>([])
   const [hasSearched, setHasSearched] = useState(false)
@@ -25,8 +49,32 @@ function BrowsePage() {
   const [currentOffset, setCurrentOffset] = useState(0)
   const [hasMore, setHasMore] = useState(false)
   const [totalResults, setTotalResults] = useState(0)
+  const [currentGenre, setCurrentGenre] = useState('')
   const loadMoreRef = useRef<HTMLDivElement>(null)
   const currentSearchQuery = useRef('')
+
+  // Load random books on initial page load
+  useEffect(() => {
+    const loadRandomBooks = async () => {
+      const randomGenre = RANDOM_GENRES[Math.floor(Math.random() * RANDOM_GENRES.length)]
+      setCurrentGenre(randomGenre)
+      currentSearchQuery.current = randomGenre
+
+      try {
+        const data = await searchBooksServer({ data: { query: randomGenre, offset: 0 } })
+        setResults(data.books)
+        setHasMore(data.hasMore)
+        setTotalResults(data.total)
+      } catch (error) {
+        console.error('Error loading random books:', error)
+        setResults([])
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    loadRandomBooks()
+  }, []) // Empty dependency array means this runs once on mount
 
   const handleSearch = useCallback(
     async (mode: SearchMode) => {
@@ -37,6 +85,7 @@ function BrowsePage() {
       setLastSearchMode(mode)
       setAiExplanation('')
       setCurrentOffset(0)
+      setCurrentGenre('') // Clear genre when user searches
       currentSearchQuery.current = searchQuery.trim()
 
       try {
@@ -134,7 +183,11 @@ function BrowsePage() {
           Browse the <span className="italic">Library</span>
         </h1>
         <p className="mt-3 text-muted-foreground">
-          Search for books using the Open Library database
+          {currentGenre && !hasSearched ? (
+            <>Discover books from random genres, or search for something specific</>
+          ) : (
+            <>Search for books using the Open Library database</>
+          )}
         </p>
       </div>
 
@@ -170,9 +223,17 @@ function BrowsePage() {
                 <Sparkles className="h-4 w-4 text-purple-500" />
               )}
               <span className="text-sm font-medium text-muted-foreground">
-                {results.length} of {totalResults} results
-                {lastSearchMode === 'ai' && aiExplanation && (
-                  <span className="ml-2 text-purple-500">• {aiExplanation}</span>
+                {currentGenre && !hasSearched ? (
+                  <>
+                    Explore <span className="italic capitalize">{currentGenre}</span> • {results.length} of {totalResults} books
+                  </>
+                ) : (
+                  <>
+                    {results.length} of {totalResults} results
+                    {lastSearchMode === 'ai' && aiExplanation && (
+                      <span className="ml-2 text-purple-500">• {aiExplanation}</span>
+                    )}
+                  </>
                 )}
               </span>
             </div>
@@ -230,8 +291,8 @@ function BrowsePage() {
         </div>
       )}
 
-      {/* Initial State */}
-      {!isLoading && !hasSearched && (
+      {/* Initial State - Only show if no results */}
+      {!isLoading && !hasSearched && results.length === 0 && (
         <div className="mx-auto max-w-3xl">
           <Card className="relative overflow-hidden">
             <WavyLinesBackground className="opacity-40" />
