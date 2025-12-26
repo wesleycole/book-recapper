@@ -1,7 +1,6 @@
 import { BookOpen, User, Calendar } from 'lucide-react'
 import { cn } from '~/lib/utils'
 import { WavyLinesBackground } from '~/components/ui/wavy-lines'
-import { Badge } from '~/components/ui/badge'
 import type { BookDetails } from '~/lib/openlib'
 
 interface BookCardProps {
@@ -127,18 +126,6 @@ export function BookCard({ book, onClick, variant = 'default', className }: Book
             )}
           </div>
 
-          {/* Meta info at bottom - small tags */}
-          {book.subjects && book.subjects.length > 0 && (
-            <div className="mt-auto border-t border-border/50 px-4 py-3">
-              <div className="flex flex-wrap justify-center gap-1.5">
-                {book.subjects.slice(0, 2).map((subject) => (
-                  <Badge key={subject} variant="secondary" className="text-[10px] px-2 py-0.5">
-                    {subject}
-                  </Badge>
-                ))}
-              </div>
-            </div>
-          )}
         </div>
       </button>
     )
@@ -222,15 +209,6 @@ export function BookCard({ book, onClick, variant = 'default', className }: Book
             </p>
           )}
 
-          {book.subjects && book.subjects.length > 0 && !isCompact && (
-            <div className={cn('mt-2 flex flex-wrap gap-1', isFeatured && 'justify-center')}>
-              {book.subjects.slice(0, 2).map((subject) => (
-                <Badge key={subject} variant="secondary" className="text-xs">
-                  {subject}
-                </Badge>
-              ))}
-            </div>
-          )}
         </div>
       </div>
     </button>
@@ -292,12 +270,6 @@ export function BookCardSkeleton({ variant = 'default', className }: BookCardSke
             <div className="mx-auto h-6 w-3/4 animate-pulse rounded bg-muted" />
             <div className="mx-auto h-4 w-1/2 animate-pulse rounded bg-muted" />
             <div className="mx-auto h-4 w-1/4 animate-pulse rounded bg-muted" />
-          </div>
-          <div className="mt-auto border-t border-border/50 px-4 py-3">
-            <div className="flex justify-center gap-1.5">
-              <div className="h-5 w-16 animate-pulse rounded-full bg-muted" />
-              <div className="h-5 w-20 animate-pulse rounded-full bg-muted" />
-            </div>
           </div>
         </div>
       </div>
