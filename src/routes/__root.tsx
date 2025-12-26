@@ -32,7 +32,7 @@ export const Route = createRootRoute({
   shellComponent: RootDocument,
 })
 
-function RootDocument({ children }: { children: React.ReactNode }) {
+function RootDocument() {
   return (
     <html lang="en">
       <head>
@@ -72,7 +72,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
             </div>
           </header>
           <main className="flex-1">
-            {children}
+            <Outlet />
           </main>
           <footer className="border-t py-6 text-center text-sm text-muted-foreground">
             <p>Book Recapper - Never forget what happened in your favorite series</p>
