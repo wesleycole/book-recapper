@@ -220,7 +220,7 @@ function HomePage() {
 
           {/* Search form */}
           <form onSubmit={handleSubmit} className="mx-auto w-full max-w-2xl">
-            <div className="relative rounded-2xl border border-border bg-card/80 shadow-lg backdrop-blur-sm">
+            <div className="relative rounded-2xl border border-white/20 bg-white/15 shadow-lg backdrop-blur-sm">
               {/* Animated placeholder overlay */}
               {!input && (
                 <div
