@@ -451,3 +451,94 @@
 .ai-indicator {
   animation: sparkle 1.5s ease-in-out infinite;
 }
+
+/* Hero Section Styles */
+.hero-section {
+  position: relative;
+  background-color: hsl(200 15% 20%);
+}
+
+.hero-image-container {
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+
+.hero-image {
+  transform: scale(1.1);
+  will-change: transform;
+}
+
+.hero-content {
+  transform-style: preserve-3d;
+  z-index: 10;
+}
+
+.hero-title {
+  text-shadow:
+    0 2px 4px rgba(0, 0, 0, 0.3),
+    0 8px 16px rgba(0, 0, 0, 0.2);
+  line-height: 1.1;
+}
+
+.hero-subtitle {
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+.hero-input {
+  box-shadow:
+    0 4px 30px rgba(0, 0, 0, 0.3),
+    inset 0 1px 1px rgba(255, 255, 255, 0.1);
+  transition: all 0.3s ease;
+}
+
+.hero-input:focus {
+  box-shadow:
+    0 8px 40px rgba(0, 0, 0, 0.4),
+    inset 0 1px 1px rgba(255, 255, 255, 0.15);
+}
+
+.hero-button {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+  transition: all 0.3s ease;
+}
+
+.hero-button:hover:not(:disabled) {
+  box-shadow: 0 6px 25px rgba(0, 0, 0, 0.35);
+  transform: translateY(-2px);
+}
+
+.hero-button:disabled {
+  opacity: 0.5;
+}
+
+/* Scroll indicator pulse animation */
+.scroll-indicator {
+  animation: pulse-scroll 2s ease-in-out infinite;
+}
+
+@keyframes pulse-scroll {
+  0%, 100% {
+    opacity: 0.7;
+    transform: translateX(-50%) translateY(0);
+  }
+  50% {
+    opacity: 1;
+    transform: translateX(-50%) translateY(-5px);
+  }
+}
+
+/* Enhanced bounce animation for chevron */
+@keyframes bounce-enhanced {
+  0%, 100% {
+    transform: translateY(0);
+    animation-timing-function: cubic-bezier(0.8, 0, 1, 1);
+  }
+  50% {
+    transform: translateY(25%);
+    animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
+  }
+}
+
+.scroll-indicator .animate-bounce {
+  animation: bounce-enhanced 1.5s infinite;
+}
