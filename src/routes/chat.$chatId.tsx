@@ -231,10 +231,10 @@ function ChatPage() {
               </p>
               <div className="flex flex-wrap justify-center gap-2">
                 {[
-                  'The Way of Kings',
-                  'A Game of Thrones',
-                  'The Name of the Wind',
-                  'Mistborn',
+                  'Pride and Prejudice',
+                  'Gone Girl',
+                  'The Hunger Games',
+                  'Harry Potter',
                 ].map((suggestion) => (
                   <button
                     key={suggestion}
