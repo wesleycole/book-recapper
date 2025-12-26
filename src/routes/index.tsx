@@ -189,14 +189,11 @@ function HomePage() {
         className="relative flex min-h-[calc(100vh-3.5rem)] flex-col items-center justify-center px-4"
         style={{
           backgroundImage: 'url(/man_orb.png)',
-          backgroundSize: 'contain',
+          backgroundSize: 'cover',
           backgroundPosition: 'center bottom',
           backgroundRepeat: 'no-repeat',
         }}
       >
-        {/* Background overlay for better text readability */}
-        <div className="absolute inset-0 bg-background/50" />
-
         <div className="relative z-10 w-full max-w-4xl">
           {/* Hero content - centered */}
           <div className="text-center">
