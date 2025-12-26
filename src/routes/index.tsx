@@ -213,7 +213,7 @@ function HomePage() {
             <h1 className="font-display text-4xl font-light tracking-tight text-gold sm:text-5xl md:text-6xl">
               Rediscover <span className="italic">Your</span> Books
             </h1>
-            <p className="mt-4 text-lg text-gold-light opacity-80">
+            <p className="mt-4 text-lg text-white/80">
               Get AI-powered recaps to refresh your memory before the next chapter
             </p>
           </div>
@@ -224,7 +224,7 @@ function HomePage() {
               {/* Animated placeholder overlay */}
               {!input && (
                 <div
-                  className="pointer-events-none absolute left-5 top-4 text-base text-gold-light opacity-60"
+                  className="pointer-events-none absolute left-5 top-4 text-base text-white/60"
                   aria-hidden="true"
                 >
                   <span>{placeholderText}</span>
@@ -237,7 +237,7 @@ function HomePage() {
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyDown}
                 rows={3}
-                className="w-full resize-none rounded-2xl bg-transparent px-5 py-4 pb-14 text-base text-gold focus:outline-none"
+                className="w-full resize-none rounded-2xl bg-transparent px-5 py-4 pb-14 text-base text-white focus:outline-none"
               />
               <div className="absolute bottom-3 right-3">
                 <Button
@@ -269,7 +269,7 @@ function HomePage() {
                 size="icon"
                 onClick={() => scrollCarousel('left')}
                 disabled={!canScrollLeft}
-                className="h-10 w-10 rounded-full border-border text-gold hover:bg-secondary hover:text-primary"
+                className="h-10 w-10 rounded-full border-border text-white hover:bg-secondary hover:text-primary"
               >
                 <ChevronLeft className="h-5 w-5" />
               </Button>
@@ -278,7 +278,7 @@ function HomePage() {
                 size="icon"
                 onClick={() => scrollCarousel('right')}
                 disabled={!canScrollRight && !isLoadingMore}
-                className="h-10 w-10 rounded-full border-border text-gold hover:bg-secondary hover:text-primary"
+                className="h-10 w-10 rounded-full border-border text-white hover:bg-secondary hover:text-primary"
               >
                 <ChevronRight className="h-5 w-5" />
               </Button>

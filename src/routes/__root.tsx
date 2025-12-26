@@ -60,14 +60,14 @@ function RootDocument() {
               <nav className="ml-auto flex items-center gap-1">
                 <Link
                   to="/"
-                  className="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-gold-light transition-colors hover:bg-secondary hover:text-primary [&.active]:bg-secondary [&.active]:text-primary"
+                  className="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white/80 transition-colors hover:bg-secondary hover:text-white [&.active]:bg-secondary [&.active]:text-white"
                 >
                   <BookOpen className="h-4 w-4" />
                   <span className="hidden sm:inline">Recap</span>
                 </Link>
                 <Link
                   to="/browse"
-                  className="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-gold-light transition-colors hover:bg-secondary hover:text-primary [&.active]:bg-secondary [&.active]:text-primary"
+                  className="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white/80 transition-colors hover:bg-secondary hover:text-white [&.active]:bg-secondary [&.active]:text-white"
                 >
                   <Library className="h-4 w-4" />
                   <span className="hidden sm:inline">Browse</span>

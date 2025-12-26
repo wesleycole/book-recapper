@@ -4,35 +4,35 @@
 @theme {
   /* Background colors - dark teal #3d5557 */
   --color-background: #3d5557;
-  --color-foreground: hsl(45 70% 65%);
+  --color-foreground: #ffffff;
 
   /* Card colors - slightly lighter teal */
   --color-card: hsl(183 18% 32%);
-  --color-card-foreground: hsl(45 70% 65%);
+  --color-card-foreground: #ffffff;
 
   /* Popover colors */
   --color-popover: hsl(183 18% 32%);
-  --color-popover-foreground: hsl(45 70% 65%);
+  --color-popover-foreground: #ffffff;
 
   /* Primary colors - gold filigree */
-  --color-primary: hsl(45 80% 55%);
+  --color-primary: #c98e43;
   --color-primary-foreground: #3d5557;
 
   /* Secondary colors - darker teal accent */
   --color-secondary: hsl(183 18% 25%);
-  --color-secondary-foreground: hsl(45 70% 65%);
+  --color-secondary-foreground: #ffffff;
 
-  /* Muted colors - muted gold/bronze */
+  /* Muted colors - muted text */
   --color-muted: hsl(183 15% 25%);
-  --color-muted-foreground: hsl(45 50% 55%);
+  --color-muted-foreground: rgba(255, 255, 255, 0.7);
 
   /* Accent colors - warm gold accent */
   --color-accent: hsl(183 18% 35%);
-  --color-accent-foreground: hsl(45 75% 60%);
+  --color-accent-foreground: #ffffff;
 
   /* Destructive colors */
   --color-destructive: hsl(0 65% 50%);
-  --color-destructive-foreground: hsl(45 70% 65%);
+  --color-destructive-foreground: #ffffff;
 
   /* Border and input colors - subtle gold borders */
   --color-border: hsl(45 40% 30%);
@@ -43,15 +43,15 @@
   --color-wavy-line: hsl(45 30% 35%);
   --color-wavy-line-light: hsl(45 30% 25%);
 
-  /* Gold filigree colors - for text and accents */
-  --color-gold: hsl(45 80% 55%);
-  --color-gold-light: hsl(45 70% 70%);
-  --color-gold-dark: hsl(45 60% 45%);
+  /* Gold filigree colors - for headings and accents */
+  --color-gold: #c98e43;
+  --color-gold-light: #daa560;
+  --color-gold-dark: #a87535;
 
   /* Gold with raw values for opacity support */
-  --gold: 45 80% 55%;
-  --gold-light: 45 70% 70%;
-  --gold-dark: 45 60% 45%;
+  --gold: 35 58% 52%;
+  --gold-light: 35 65% 62%;
+  --gold-dark: 35 52% 43%;
 
   /* Border radius */
   --radius-lg: 0.75rem;
@@ -67,24 +67,24 @@
 /* Dark mode colors - same as default since we're dark by default */
 .dark {
   --color-background: #3d5557;
-  --color-foreground: hsl(45 70% 65%);
+  --color-foreground: #ffffff;
   --color-card: hsl(183 18% 32%);
-  --color-card-foreground: hsl(45 70% 65%);
+  --color-card-foreground: #ffffff;
   --color-popover: hsl(183 18% 32%);
-  --color-popover-foreground: hsl(45 70% 65%);
-  --color-primary: hsl(45 80% 55%);
+  --color-popover-foreground: #ffffff;
+  --color-primary: #c98e43;
   --color-primary-foreground: #3d5557;
   --color-secondary: hsl(183 18% 25%);
-  --color-secondary-foreground: hsl(45 70% 65%);
+  --color-secondary-foreground: #ffffff;
   --color-muted: hsl(183 15% 25%);
-  --color-muted-foreground: hsl(45 50% 55%);
+  --color-muted-foreground: rgba(255, 255, 255, 0.7);
   --color-accent: hsl(183 18% 35%);
-  --color-accent-foreground: hsl(45 75% 60%);
+  --color-accent-foreground: #ffffff;
   --color-destructive: hsl(0 60% 45%);
-  --color-destructive-foreground: hsl(45 70% 65%);
+  --color-destructive-foreground: #ffffff;
   --color-border: hsl(45 40% 30%);
   --color-input: hsl(45 40% 30%);
-  --color-ring: hsl(45 80% 55%);
+  --color-ring: #c98e43;
   --color-wavy-line: hsl(45 30% 35%);
   --color-wavy-line-light: hsl(45 30% 25%);
 }
