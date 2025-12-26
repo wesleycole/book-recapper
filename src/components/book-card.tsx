@@ -83,8 +83,8 @@ export function BookCard({ book, onClick, variant = 'default', className }: Book
           className
         )}
       >
-        {/* Wavy lines background - positioned at top */}
-        <div className="absolute inset-x-0 top-0 h-48">
+        {/* Wavy lines background - covers entire card */}
+        <div className="absolute inset-0">
           <WavyLinesBackground className="opacity-40 transition-opacity group-hover:opacity-60" />
         </div>
 
@@ -97,7 +97,7 @@ export function BookCard({ book, onClick, variant = 'default', className }: Book
                 <img
                   src={book.coverUrl}
                   alt={book.title}
-                  className="h-full w-full object-cover"
+                  className="h-full w-full object-contain"
                   loading="lazy"
                 />
               ) : (
