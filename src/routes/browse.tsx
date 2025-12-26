@@ -70,10 +70,10 @@ function BrowsePage() {
     <div className="container mx-auto px-4 py-8">
       {/* Header */}
       <div className="mb-8 text-center">
-        <h1 className="font-serif text-4xl font-light tracking-tight text-foreground">
+        <h1 className="font-display text-4xl font-light tracking-tight text-gold sm:text-5xl">
           Browse the <span className="italic">Library</span>
         </h1>
-        <p className="mt-3 text-muted-foreground">
+        <p className="mt-3 text-white/80">
           Search for books using the Open Library database
         </p>
       </div>
@@ -91,10 +91,10 @@ function BrowsePage() {
 
       {/* Loading State */}
       {isLoading && (
-        <div className="mx-auto max-w-6xl">
-          <div className="grid gap-4 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
-            {Array.from({ length: 10 }).map((_, i) => (
-              <BookCardSkeleton key={i} variant="grid" />
+        <div className="mx-auto max-w-[1400px]">
+          <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 justify-items-center">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <BookCardSkeleton key={i} variant="carousel" />
             ))}
           </div>
         </div>
@@ -102,7 +102,7 @@ function BrowsePage() {
 
       {/* Results */}
       {!isLoading && results.length > 0 && (
-        <div className="mx-auto max-w-6xl">
+        <div className="mx-auto max-w-[1400px]">
           <div className="mb-6 flex items-center gap-4">
             <div className="h-px flex-1 bg-border" />
             <div className="flex items-center gap-2">
@@ -118,13 +118,13 @@ function BrowsePage() {
             </div>
             <div className="h-px flex-1 bg-border" />
           </div>
-          <div className="grid gap-4 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+          <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 justify-items-center">
             {results.map((book) => (
               <BookCard
                 key={book.key}
                 book={book}
                 onClick={() => handleSelectBook(book)}
-                variant="grid"
+                variant="carousel"
               />
             ))}
           </div>
