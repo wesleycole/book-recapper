@@ -77,7 +77,7 @@ export function BookCard({ book, onClick, variant = 'default', className }: Book
       <button
         onClick={onClick}
         className={cn(
-          'group relative flex h-[480px] w-[320px] flex-shrink-0 flex-col overflow-hidden rounded-md border border-border bg-card text-left transition-all duration-300',
+          'group relative flex h-[480px] w-[320px] flex-shrink-0 flex-col overflow-hidden rounded-md border border-gray-200 bg-gray-100 text-left transition-all duration-300',
           'hover:border-primary/30 hover:shadow-lg',
           className
         )}
@@ -109,17 +109,17 @@ export function BookCard({ book, onClick, variant = 'default', className }: Book
 
           {/* Title and author - middle section */}
           <div className="px-6 pb-3 text-center">
-            <h3 className="font-serif text-xl font-semibold leading-tight text-foreground line-clamp-2">
+            <h3 className="font-serif text-xl font-semibold leading-tight text-gray-800 line-clamp-2">
               {book.title}
             </h3>
             {book.authors.length > 0 && (
-              <p className="mt-2 flex items-center justify-center gap-1 text-sm text-muted-foreground">
+              <p className="mt-2 flex items-center justify-center gap-1 text-sm text-gray-500">
                 <User className="h-3 w-3" />
                 <span className="line-clamp-1">{book.authors.join(', ')}</span>
               </p>
             )}
             {book.publishYear && (
-              <p className="mt-1 flex items-center justify-center gap-1 text-sm text-muted-foreground">
+              <p className="mt-1 flex items-center justify-center gap-1 text-sm text-gray-500">
                 <Calendar className="h-3 w-3" />
                 {book.publishYear}
               </p>
@@ -255,7 +255,7 @@ export function BookCardSkeleton({ variant = 'default', className }: BookCardSke
     return (
       <div
         className={cn(
-          'relative flex h-[480px] w-[320px] flex-shrink-0 flex-col overflow-hidden rounded-md border border-border bg-card',
+          'relative flex h-[480px] w-[320px] flex-shrink-0 flex-col overflow-hidden rounded-md border border-gray-200 bg-gray-100',
           className
         )}
       >
