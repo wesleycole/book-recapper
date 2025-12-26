@@ -4,6 +4,8 @@ node_modules/
 # Build output
 .output/
 .vinxi/
+.nitro/
+.vercel/
 dist/
 
 # Environment
