@@ -220,11 +220,11 @@ function HomePage() {
 
           {/* Search form */}
           <form onSubmit={handleSubmit} className="mx-auto w-full max-w-2xl">
-            <div className="relative rounded-2xl border border-white/20 bg-white/15 shadow-lg backdrop-blur-sm">
+            <div className="relative rounded-2xl border border-white/20 bg-white shadow-lg">
               {/* Animated placeholder overlay */}
               {!input && (
                 <div
-                  className="pointer-events-none absolute left-5 top-4 text-base text-white/60"
+                  className="pointer-events-none absolute left-5 top-4 text-base text-gray-400"
                   aria-hidden="true"
                 >
                   <span>{placeholderText}</span>
@@ -237,7 +237,7 @@ function HomePage() {
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyDown}
                 rows={3}
-                className="w-full resize-none rounded-2xl bg-transparent px-5 py-4 pb-14 text-base text-white focus:outline-none"
+                className="w-full resize-none rounded-2xl bg-transparent px-5 py-4 pb-14 text-base text-gray-800 focus:outline-none"
               />
               <div className="absolute bottom-3 right-3">
                 <Button
