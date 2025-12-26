@@ -5,6 +5,19 @@ import { Button } from '~/components/ui/button'
 import { BookCard, BookCardSkeleton } from '~/components/book-card'
 import { searchBooksServer } from '~/server/books'
 import type { BookDetails } from '~/lib/openlib'
+import { useTypingPlaceholder } from '~/hooks/useTypingPlaceholder'
+
+const PLACEHOLDER_PREFIX = "What happened "
+const PLACEHOLDER_SUFFIXES = [
+  "at the end of 1984?",
+  "in books 1-3 of Harry Potter?",
+  "to Gatsby?",
+  "in the Hunger Games trilogy?",
+  "between Elizabeth and Darcy?",
+  "in the first Dune book?",
+  "to Amy in Gone Girl?",
+  "in Lord of the Rings?",
+]
 
 const INITIAL_BOOKS = [
   'Pride and Prejudice',
@@ -47,6 +60,15 @@ function HomePage() {
   const inputRef = useRef<HTMLTextAreaElement>(null)
   const carouselRef = useRef<HTMLDivElement>(null)
   const navigate = useNavigate()
+
+  const { displayText: placeholderText } = useTypingPlaceholder({
+    prefix: PLACEHOLDER_PREFIX,
+    suffixes: PLACEHOLDER_SUFFIXES,
+    typingSpeed: 50,
+    deletingSpeed: 35,
+    pauseBeforeDelete: 1500,
+    pauseDuration: 400,
+  })
 
   // Fetch initial books
   useEffect(() => {
@@ -186,14 +208,23 @@ function HomePage() {
         {/* Search form */}
         <form onSubmit={handleSubmit} className="mx-auto w-full max-w-2xl">
           <div className="relative rounded-2xl border border-border bg-card shadow-sm">
+            {/* Animated placeholder overlay */}
+            {!input && (
+              <div
+                className="pointer-events-none absolute left-5 top-4 text-base text-muted-foreground"
+                aria-hidden="true"
+              >
+                <span>{placeholderText}</span>
+                <span className="typing-cursor" />
+              </div>
+            )}
             <textarea
               ref={inputRef}
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="Search for a book..."
               rows={3}
-              className="w-full resize-none rounded-2xl bg-transparent px-5 py-4 pb-14 text-base placeholder:text-muted-foreground focus:outline-none"
+              className="w-full resize-none rounded-2xl bg-transparent px-5 py-4 pb-14 text-base focus:outline-none"
             />
             <div className="absolute bottom-3 right-3">
               <Button
