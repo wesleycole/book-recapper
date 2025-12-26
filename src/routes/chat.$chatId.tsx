@@ -1,0 +1,359 @@
+import { createFileRoute } from '@tanstack/react-router'
+import { useState, useCallback, useRef, useEffect } from 'react'
+import { Send, ChevronDown, ChevronUp } from 'lucide-react'
+import { Button } from '~/components/ui/button'
+import { streamRecap, type RecapStreamResponse } from '~/server/recap'
+import type { TavilySearchResult } from '~/lib/tavily'
+import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
+
+type ChatSearch = {
+  q?: string
+}
+
+export const Route = createFileRoute('/chat/$chatId')({
+  component: ChatPage,
+  validateSearch: (search: Record<string, unknown>): ChatSearch => {
+    return {
+      q: typeof search.q === 'string' ? search.q : undefined,
+    }
+  },
+})
+
+interface Message {
+  id: string
+  role: 'user' | 'assistant'
+  content: string
+  sources?: TavilySearchResult[]
+  isStreaming?: boolean
+  showSources?: boolean
+}
+
+function ChatPage() {
+  const { chatId } = Route.useParams()
+  const { q: initialQuery } = Route.useSearch()
+  const [messages, setMessages] = useState<Message[]>([])
+  const [input, setInput] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
+  const messagesEndRef = useRef<HTMLDivElement>(null)
+  const inputRef = useRef<HTMLInputElement>(null)
+  const hasProcessedInitialQuery = useRef(false)
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }
+
+  useEffect(() => {
+    scrollToBottom()
+  }, [messages])
+
+  const toggleSources = (messageId: string) => {
+    setMessages((prev) =>
+      prev.map((msg) =>
+        msg.id === messageId ? { ...msg, showSources: !msg.showSources } : msg
+      )
+    )
+  }
+
+  const processQuery = useCallback(
+    async (query: string) => {
+      if (!query.trim() || isLoading) return
+
+      const userMessage: Message = {
+        id: Date.now().toString(),
+        role: 'user',
+        content: query.trim(),
+      }
+
+      const assistantMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        role: 'assistant',
+        content: '',
+        isStreaming: true,
+      }
+
+      setMessages((prev) => [...prev, userMessage, assistantMessage])
+      setIsLoading(true)
+
+      try {
+        console.log('Starting stream for:', query.trim())
+        const stream = await streamRecap({
+          data: {
+            bookTitle: query.trim(),
+          },
+        })
+
+        console.log('Stream initialized:', stream)
+        let hasReceivedContent = false
+        let chunkCount = 0
+
+        for await (const chunk of stream) {
+          chunkCount++
+          console.log(`Received chunk ${chunkCount}:`, chunk)
+
+          try {
+            const parsed: RecapStreamResponse = JSON.parse(chunk)
+            console.log('Parsed chunk:', parsed)
+
+            switch (parsed.type) {
+              case 'sources':
+                if (parsed.sources) {
+                  console.log('Received sources:', parsed.sources.length)
+                  setMessages((prev) =>
+                    prev.map((msg) =>
+                      msg.id === assistantMessage.id
+                        ? { ...msg, sources: parsed.sources }
+                        : msg
+                    )
+                  )
+                }
+                break
+              case 'content':
+                if (parsed.data) {
+                  hasReceivedContent = true
+                  console.log('Received content chunk:', parsed.data.substring(0, 50))
+                  setMessages((prev) =>
+                    prev.map((msg) =>
+                      msg.id === assistantMessage.id
+                        ? { ...msg, content: msg.content + parsed.data }
+                        : msg
+                    )
+                  )
+                }
+                break
+              case 'done':
+                console.log('Stream completed')
+                setMessages((prev) =>
+                  prev.map((msg) =>
+                    msg.id === assistantMessage.id
+                      ? { ...msg, isStreaming: false }
+                      : msg
+                  )
+                )
+                break
+              case 'error':
+                console.error('Stream error from server:', parsed.data)
+                setMessages((prev) =>
+                  prev.map((msg) =>
+                    msg.id === assistantMessage.id
+                      ? {
+                          ...msg,
+                          content:
+                            'Sorry, I encountered an error: ' +
+                            (parsed.data || 'An error occurred'),
+                          isStreaming: false,
+                        }
+                      : msg
+                  )
+                )
+                break
+            }
+          } catch (parseErr) {
+            console.error('Failed to parse chunk:', chunk, parseErr)
+          }
+        }
+
+        console.log(`Stream ended. Total chunks: ${chunkCount}, hasReceivedContent: ${hasReceivedContent}`)
+
+        // If stream ended without 'done' message, mark as complete
+        if (hasReceivedContent) {
+          setMessages((prev) =>
+            prev.map((msg) =>
+              msg.id === assistantMessage.id
+                ? { ...msg, isStreaming: false }
+                : msg
+            )
+          )
+        }
+      } catch (err) {
+        console.error('Stream error:', err)
+        setMessages((prev) =>
+          prev.map((msg) =>
+            msg.id === assistantMessage.id
+              ? {
+                  ...msg,
+                  content:
+                    'Sorry, I encountered an error: ' +
+                    (err instanceof Error ? err.message : 'An error occurred'),
+                  isStreaming: false,
+                }
+              : msg
+          )
+        )
+      } finally {
+        // Always reset loading state when stream completes or fails
+        console.log('Resetting loading state')
+        setIsLoading(false)
+      }
+    },
+    [isLoading]
+  )
+
+  // Process initial query from URL search params
+  useEffect(() => {
+    if (initialQuery && !hasProcessedInitialQuery.current) {
+      hasProcessedInitialQuery.current = true
+      processQuery(initialQuery)
+    }
+  }, [initialQuery, processQuery])
+
+  const handleSubmit = useCallback(
+    (e?: React.FormEvent) => {
+      e?.preventDefault()
+      if (!input.trim()) return
+      processQuery(input.trim())
+      setInput('')
+    },
+    [input, processQuery]
+  )
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      e.preventDefault()
+      handleSubmit()
+    }
+  }
+
+  const handleSuggestionClick = (text: string) => {
+    setInput(text)
+    inputRef.current?.focus()
+  }
+
+  return (
+    <div className="chat-container flex h-[calc(100vh-3.5rem)] flex-col">
+      {/* Messages Area */}
+      <div className="flex-1 overflow-y-auto pb-4">
+        <div className="mx-auto max-w-2xl px-4 py-4">
+          {messages.length === 0 ? (
+            <div className="flex min-h-[60vh] flex-col items-center justify-center px-4">
+              <p className="mb-8 text-center text-lg text-muted-foreground">
+                What book would you like to recap?
+              </p>
+              <div className="flex flex-wrap justify-center gap-2">
+                {[
+                  'The Way of Kings',
+                  'A Game of Thrones',
+                  'The Name of the Wind',
+                  'Mistborn',
+                ].map((suggestion) => (
+                  <button
+                    key={suggestion}
+                    onClick={() => handleSuggestionClick(suggestion)}
+                    className="suggestion-chip rounded-full border border-border bg-card px-4 py-2 text-sm transition-all hover:border-primary hover:bg-accent active:scale-95"
+                  >
+                    {suggestion}
+                  </button>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-4 pt-2">
+              {messages.map((message) => (
+                <div
+                  key={message.id}
+                  className={`message-row flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                >
+                  {message.role === 'user' ? (
+                    <div className="user-bubble max-w-[80%] rounded-3xl rounded-br-lg bg-primary px-4 py-2.5 text-primary-foreground">
+                      <p className="text-[15px] leading-relaxed">
+                        {message.content}
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="assistant-message max-w-[90%] space-y-3">
+                      {/* Typing indicator or content */}
+                      {!message.content && message.isStreaming ? (
+                        <div className="typing-indicator flex items-center gap-1 px-1 py-2">
+                          <span className="dot"></span>
+                          <span className="dot"></span>
+                          <span className="dot"></span>
+                        </div>
+                      ) : (
+                        <>
+                          {message.content && (
+                            <div
+                              className={`prose-recap ${
+                                message.isStreaming ? 'streaming-cursor' : ''
+                              }`}
+                            >
+                              <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                                {message.content}
+                              </ReactMarkdown>
+                            </div>
+                          )}
+
+                          {/* Collapsible sources */}
+                          {message.sources && message.sources.length > 0 && (
+                            <div className="sources-section">
+                              <button
+                                onClick={() => toggleSources(message.id)}
+                                className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
+                              >
+                                {message.showSources ? (
+                                  <ChevronUp className="h-3.5 w-3.5" />
+                                ) : (
+                                  <ChevronDown className="h-3.5 w-3.5" />
+                                )}
+                                <span>{message.sources.length} sources</span>
+                              </button>
+                              {message.showSources && (
+                                <div className="mt-2 flex flex-wrap gap-2">
+                                  {message.sources.map((source, index) => (
+                                    <a
+                                      key={index}
+                                      href={source.url}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="source-chip inline-flex items-center gap-1.5 rounded-full bg-muted px-3 py-1.5 text-xs text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
+                                    >
+                                      <span className="max-w-[150px] truncate">
+                                        {new URL(source.url).hostname.replace('www.', '')}
+                                      </span>
+                                    </a>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                          )}
+                        </>
+                      )}
+                    </div>
+                  )}
+                </div>
+              ))}
+              <div ref={messagesEndRef} />
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Input Area */}
+      <div className="chat-input-area sticky bottom-0 border-t bg-background/95 backdrop-blur-sm px-4 py-3">
+        <div className="mx-auto max-w-2xl">
+          <form onSubmit={handleSubmit} className="flex items-center gap-2">
+            <div className="relative flex-1">
+              <input
+                ref={inputRef}
+                type="text"
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={handleKeyDown}
+                placeholder="Ask about a book..."
+                disabled={isLoading}
+                className="chat-input w-full rounded-full border border-border bg-card px-4 py-3 pr-12 text-[15px] placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 disabled:opacity-50"
+              />
+            </div>
+            <Button
+              type="submit"
+              size="icon"
+              disabled={isLoading || !input.trim()}
+              className="send-button h-11 w-11 shrink-0 rounded-full"
+            >
+              <Send className="h-4 w-4" />
+            </Button>
+          </form>
+        </div>
+      </div>
+    </div>
+  )
+}
