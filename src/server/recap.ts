@@ -1,9 +1,9 @@
-import { createServerFn } from '@tanstack/start'
+import { createServerFn } from '@tanstack/react-start'
 import { searchTavily, type TavilySearchResult } from '~/lib/tavily'
 import { streamMinimaxChat, createBookRecapPrompt } from '~/lib/minimax'
 import { db } from '~/db'
 import { recaps } from '~/db/schema'
-import { desc } from 'drizzle-orm'
+import { desc, eq } from 'drizzle-orm'
 
 export interface RecapRequest {
   bookTitle: string
@@ -20,7 +20,7 @@ export interface RecapStreamResponse {
 }
 
 export const generateRecap = createServerFn({ method: 'POST' })
-  .validator((data: RecapRequest) => data)
+  .inputValidator((data: RecapRequest) => data)
   .handler(async ({ data }) => {
     const { bookTitle, seriesName, author, additionalContext } = data
 
@@ -87,7 +87,7 @@ export const generateRecap = createServerFn({ method: 'POST' })
   })
 
 export const streamRecap = createServerFn({ method: 'POST' })
-  .validator((data: RecapRequest) => data)
+  .inputValidator((data: RecapRequest) => data)
   .handler(async function* ({ data }) {
     const { bookTitle, seriesName, author, additionalContext } = data
 
@@ -177,9 +177,9 @@ export const getRecentRecaps = createServerFn({ method: 'GET' }).handler(
 )
 
 export const getRecapById = createServerFn({ method: 'GET' })
-  .validator((id: number) => id)
+  .inputValidator((id: number) => id)
   .handler(async ({ data: id }) => {
-    const [recap] = await db.select().from(recaps).where({ id }).limit(1)
+    const [recap] = await db.select().from(recaps).where(eq(recaps.id, id)).limit(1)
     if (!recap) return null
 
     return {
