@@ -47,27 +47,27 @@ function RootDocument() {
       </head>
       <body className="min-h-screen bg-background font-sans antialiased">
         <div className="flex min-h-screen flex-col">
-          <header className="sticky top-0 z-50 w-full border-b border-border/60 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
+          <header className="sticky top-0 z-50 w-full border-b border-border/60 bg-background">
             <div className="container mx-auto flex h-16 items-center px-4">
               <Link to="/" className="flex items-center gap-2.5">
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/20">
                   <BookOpen className="h-4 w-4 text-primary" />
                 </div>
-                <span className="font-serif text-lg font-medium tracking-tight">
+                <span className="font-serif text-lg font-medium tracking-tight text-gold">
                   Ask the Librarian
                 </span>
               </Link>
               <nav className="ml-auto flex items-center gap-1">
                 <Link
                   to="/"
-                  className="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors hover:bg-secondary hover:text-secondary-foreground [&.active]:bg-secondary [&.active]:text-secondary-foreground"
+                  className="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-gold-light transition-colors hover:bg-secondary hover:text-primary [&.active]:bg-secondary [&.active]:text-primary"
                 >
                   <BookOpen className="h-4 w-4" />
                   <span className="hidden sm:inline">Recap</span>
                 </Link>
                 <Link
                   to="/browse"
-                  className="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors hover:bg-secondary hover:text-secondary-foreground [&.active]:bg-secondary [&.active]:text-secondary-foreground"
+                  className="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-gold-light transition-colors hover:bg-secondary hover:text-primary [&.active]:bg-secondary [&.active]:text-primary"
                 >
                   <Library className="h-4 w-4" />
                   <span className="hidden sm:inline">Browse</span>
