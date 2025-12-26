@@ -7,7 +7,7 @@ import {
   createRootRoute,
 } from '@tanstack/react-router'
 import * as React from 'react'
-import { BookOpen, Library, Clock } from 'lucide-react'
+import { BookOpen, Library } from 'lucide-react'
 import appCss from '~/styles/app.css?url'
 
 export const Route = createRootRoute({
@@ -67,13 +67,6 @@ function RootDocument() {
                 >
                   <Library className="h-4 w-4" />
                   <span className="hidden sm:inline">Browse</span>
-                </Link>
-                <Link
-                  to="/recaps"
-                  className="inline-flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground [&.active]:bg-accent [&.active]:text-accent-foreground"
-                >
-                  <Clock className="h-4 w-4" />
-                  <span className="hidden sm:inline">History</span>
                 </Link>
               </nav>
             </div>
