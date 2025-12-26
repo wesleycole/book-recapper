@@ -2,32 +2,32 @@
 
 /* Custom theme using CSS custom properties - Dark Library with Gold Filigree */
 @theme {
-  /* Background colors - dark blue-green */
-  --color-background: hsl(185 35% 8%);
+  /* Background colors - dark teal #3d5557 */
+  --color-background: #3d5557;
   --color-foreground: hsl(45 70% 65%);
 
-  /* Card colors - slightly lighter dark teal */
-  --color-card: hsl(185 30% 12%);
+  /* Card colors - slightly lighter teal */
+  --color-card: hsl(183 18% 32%);
   --color-card-foreground: hsl(45 70% 65%);
 
   /* Popover colors */
-  --color-popover: hsl(185 30% 12%);
+  --color-popover: hsl(183 18% 32%);
   --color-popover-foreground: hsl(45 70% 65%);
 
   /* Primary colors - gold filigree */
   --color-primary: hsl(45 80% 55%);
-  --color-primary-foreground: hsl(185 35% 8%);
+  --color-primary-foreground: #3d5557;
 
   /* Secondary colors - darker teal accent */
-  --color-secondary: hsl(185 25% 15%);
+  --color-secondary: hsl(183 18% 25%);
   --color-secondary-foreground: hsl(45 70% 65%);
 
   /* Muted colors - muted gold/bronze */
-  --color-muted: hsl(185 20% 15%);
+  --color-muted: hsl(183 15% 25%);
   --color-muted-foreground: hsl(45 50% 55%);
 
   /* Accent colors - warm gold accent */
-  --color-accent: hsl(185 25% 18%);
+  --color-accent: hsl(183 18% 35%);
   --color-accent-foreground: hsl(45 75% 60%);
 
   /* Destructive colors */
@@ -66,19 +66,19 @@
 
 /* Dark mode colors - same as default since we're dark by default */
 .dark {
-  --color-background: hsl(185 35% 8%);
+  --color-background: #3d5557;
   --color-foreground: hsl(45 70% 65%);
-  --color-card: hsl(185 30% 12%);
+  --color-card: hsl(183 18% 32%);
   --color-card-foreground: hsl(45 70% 65%);
-  --color-popover: hsl(185 30% 12%);
+  --color-popover: hsl(183 18% 32%);
   --color-popover-foreground: hsl(45 70% 65%);
   --color-primary: hsl(45 80% 55%);
-  --color-primary-foreground: hsl(185 35% 8%);
-  --color-secondary: hsl(185 25% 15%);
+  --color-primary-foreground: #3d5557;
+  --color-secondary: hsl(183 18% 25%);
   --color-secondary-foreground: hsl(45 70% 65%);
-  --color-muted: hsl(185 20% 15%);
+  --color-muted: hsl(183 15% 25%);
   --color-muted-foreground: hsl(45 50% 55%);
-  --color-accent: hsl(185 25% 18%);
+  --color-accent: hsl(183 18% 35%);
   --color-accent-foreground: hsl(45 75% 60%);
   --color-destructive: hsl(0 60% 45%);
   --color-destructive-foreground: hsl(45 70% 65%);

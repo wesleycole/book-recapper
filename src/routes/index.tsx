@@ -184,11 +184,11 @@ function HomePage() {
 
   return (
     <div className="flex flex-col">
-      {/* Hero section - full viewport height with dark blue-green background */}
+      {/* Hero section - full viewport height with dark teal background */}
       <div
         className="relative flex h-[calc(100vh-4rem)] flex-col items-center justify-center px-4"
         style={{
-          background: 'linear-gradient(135deg, hsl(185 40% 6%) 0%, hsl(185 35% 10%) 50%, hsl(175 30% 8%) 100%)',
+          background: 'linear-gradient(135deg, #2d4547 0%, #3d5557 50%, #4a6365 100%)',
         }}
       >
         {/* Orb image - positioned in bottom right */}
