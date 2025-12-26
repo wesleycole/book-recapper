@@ -33,6 +33,12 @@ export const Route = createRootRoute({
 })
 
 function RootDocument() {
+  const [isHomePage, setIsHomePage] = React.useState(false)
+
+  React.useEffect(() => {
+    setIsHomePage(window.location.pathname === '/')
+  }, [])
+
   return (
     <html lang="en">
       <head>
@@ -74,9 +80,11 @@ function RootDocument() {
           <main className="flex-1">
             <Outlet />
           </main>
-          <footer className="border-t py-6 text-center text-sm text-muted-foreground">
-            <p>Book Recapper - Never forget what happened in your favorite series</p>
-          </footer>
+          {!isHomePage && (
+            <footer className="border-t py-6 text-center text-sm text-muted-foreground">
+              <p>Book Recapper - Never forget what happened in your favorite series</p>
+            </footer>
+          )}
         </div>
         <Scripts />
       </body>

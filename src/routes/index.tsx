@@ -64,20 +64,29 @@ function HomePage() {
       setIsLoading(true)
 
       try {
+        console.log('Starting stream for:', input.trim())
         const stream = await streamRecap({
           data: {
             bookTitle: input.trim(),
           },
         })
 
+        console.log('Stream initialized:', stream)
         let hasReceivedContent = false
+        let chunkCount = 0
+
         for await (const chunk of stream) {
+          chunkCount++
+          console.log(`Received chunk ${chunkCount}:`, chunk)
+
           try {
             const parsed: RecapStreamResponse = JSON.parse(chunk)
+            console.log('Parsed chunk:', parsed)
 
             switch (parsed.type) {
               case 'sources':
                 if (parsed.sources) {
+                  console.log('Received sources:', parsed.sources.length)
                   setMessages((prev) =>
                     prev.map((msg) =>
                       msg.id === assistantMessage.id
@@ -90,6 +99,7 @@ function HomePage() {
               case 'content':
                 if (parsed.data) {
                   hasReceivedContent = true
+                  console.log('Received content chunk:', parsed.data.substring(0, 50))
                   setMessages((prev) =>
                     prev.map((msg) =>
                       msg.id === assistantMessage.id
@@ -100,6 +110,7 @@ function HomePage() {
                 }
                 break
               case 'done':
+                console.log('Stream completed')
                 setMessages((prev) =>
                   prev.map((msg) =>
                     msg.id === assistantMessage.id
@@ -109,6 +120,7 @@ function HomePage() {
                 )
                 break
               case 'error':
+                console.error('Stream error from server:', parsed.data)
                 setMessages((prev) =>
                   prev.map((msg) =>
                     msg.id === assistantMessage.id
@@ -128,6 +140,8 @@ function HomePage() {
             console.error('Failed to parse chunk:', chunk, parseErr)
           }
         }
+
+        console.log(`Stream ended. Total chunks: ${chunkCount}, hasReceivedContent: ${hasReceivedContent}`)
 
         // If stream ended without 'done' message, mark as complete
         if (hasReceivedContent) {
@@ -156,6 +170,7 @@ function HomePage() {
         )
       } finally {
         // Always reset loading state when stream completes or fails
+        console.log('Resetting loading state')
         setIsLoading(false)
       }
     },
@@ -175,9 +190,9 @@ function HomePage() {
   }
 
   return (
-    <div className="chat-container flex h-[calc(100vh-4rem)] flex-col">
+    <div className="chat-container flex h-[calc(100vh-3.5rem)] flex-col">
       {/* Messages Area */}
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1 overflow-y-auto pb-4">
         <div className="mx-auto max-w-2xl px-4 py-4">
           {messages.length === 0 ? (
             <div className="flex min-h-[60vh] flex-col items-center justify-center px-4">
@@ -281,7 +296,7 @@ function HomePage() {
       </div>
 
       {/* Input Area */}
-      <div className="chat-input-area border-t bg-background/80 backdrop-blur-sm px-4 py-3">
+      <div className="chat-input-area sticky bottom-0 border-t bg-background/95 backdrop-blur-sm px-4 py-3">
         <div className="mx-auto max-w-2xl">
           <form onSubmit={handleSubmit} className="flex items-center gap-2">
             <div className="relative flex-1">
