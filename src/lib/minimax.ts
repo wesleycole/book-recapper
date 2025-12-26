@@ -22,7 +22,7 @@ export async function* streamMinimaxChat(
     throw new Error('MINIMAX_API_KEY is not set')
   }
 
-  const response = await fetch('https://api.minimax.chat/v1/text/chatcompletion_v2', {
+  const response = await fetch('https://api.minimax.io/v1/text/chatcompletion_v2', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
