@@ -15,10 +15,10 @@ export const Route = createRootRoute({
     meta: [
       { charSet: 'utf-8' },
       { name: 'viewport', content: 'width=device-width, initial-scale=1' },
-      { title: 'The Book Oracle - AI-Powered Book Recaps' },
+      { title: 'Ask the Librarian - AI-Powered Book Recaps' },
       {
         name: 'description',
-        content: 'Get AI-powered recaps of your favorite books and series. Refresh your memory before diving into the next chapter.',
+        content: 'Need a refresher before the next chapter? Ask the Librarian for AI-powered book recaps to help you remember the story.',
       },
     ],
     links: [
@@ -54,7 +54,7 @@ function RootDocument() {
                   <BookOpen className="h-4 w-4 text-primary" />
                 </div>
                 <span className="font-serif text-lg font-medium tracking-tight">
-                  The Book Oracle
+                  Ask the Librarian
                 </span>
               </Link>
               <nav className="ml-auto flex items-center gap-1">
@@ -82,10 +82,10 @@ function RootDocument() {
             <footer className="border-t border-border/60 py-8">
               <div className="container mx-auto px-4 text-center">
                 <p className="font-serif text-sm text-muted-foreground">
-                  The Book Oracle
+                  Ask the Librarian
                 </p>
                 <p className="mt-1 text-xs text-muted-foreground/70">
-                  AI-powered book recaps to refresh your memory
+                  askthelibrarian.app
                 </p>
               </div>
             </footer>
