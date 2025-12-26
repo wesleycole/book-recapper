@@ -183,116 +183,134 @@ function HomePage() {
   }
 
   return (
-    <div
-      className="relative flex min-h-[calc(100vh-3.5rem)] flex-col items-center justify-center px-4 py-12"
-      style={{
-        backgroundImage: 'url(/hero.png)',
-        backgroundSize: 'cover',
-        backgroundPosition: '30% center',
-        backgroundRepeat: 'no-repeat',
-      }}
-    >
-      {/* Background overlay for better text readability */}
-      <div className="absolute inset-0 bg-background/50" />
-      <div className="relative z-10 w-full max-w-4xl space-y-12">
-        {/* Hero section */}
-        <div className="text-center">
-          <h1 className="font-serif text-4xl font-light tracking-tight text-foreground sm:text-5xl">
-            Rediscover <span className="italic">Your</span> Books
-          </h1>
-          <p className="mt-4 text-lg text-muted-foreground">
-            Get AI-powered recaps to refresh your memory before the next chapter
-          </p>
-        </div>
+    <div className="relative">
+      {/* Hero section - full viewport height with background image at bottom */}
+      <div
+        className="relative flex min-h-[calc(100vh-3.5rem)] flex-col items-center justify-center px-4"
+        style={{
+          backgroundImage: 'url(/man_orb.png)',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center bottom',
+          backgroundRepeat: 'no-repeat',
+        }}
+      >
+        <div className="relative z-10 w-full max-w-4xl">
+          {/* Hero content - centered */}
+          <div className="text-center">
+            <h1
+              className="font-serif text-5xl font-bold tracking-tight sm:text-6xl"
+              style={{
+                color: '#d4a84b',
+                textShadow: '1px 1px 2px rgba(0,0,0,0.3), 0 0 20px rgba(212,168,75,0.2)',
+              }}
+            >
+              Rediscover <span className="italic">Your</span> Books
+            </h1>
+            <p
+              className="mt-4 text-xl font-medium"
+              style={{
+                color: '#c9a227',
+                textShadow: '1px 1px 2px rgba(0,0,0,0.3)',
+              }}
+            >
+              Get AI-powered recaps to refresh your memory before the next chapter
+            </p>
+          </div>
 
-        {/* Search form */}
-        <form onSubmit={handleSubmit} className="mx-auto w-full max-w-2xl">
-          <div className="relative rounded-2xl border border-border bg-card shadow-sm">
-            {/* Animated placeholder overlay */}
-            {!input && (
-              <div
-                className="pointer-events-none absolute left-5 top-4 text-base text-muted-foreground"
-                aria-hidden="true"
-              >
-                <span>{placeholderText}</span>
-                <span className="typing-cursor" />
+          {/* Search form - centered */}
+          <form onSubmit={handleSubmit} className="mx-auto mt-12 w-full max-w-2xl">
+            <div className="relative rounded-2xl border border-border bg-card shadow-sm">
+              {/* Animated placeholder overlay */}
+              {!input && (
+                <div
+                  className="pointer-events-none absolute left-5 top-4 text-base text-muted-foreground"
+                  aria-hidden="true"
+                >
+                  <span>{placeholderText}</span>
+                  <span className="typing-cursor" />
+                </div>
+              )}
+              <textarea
+                ref={inputRef}
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={handleKeyDown}
+                rows={3}
+                className="w-full resize-none rounded-2xl bg-transparent px-5 py-4 pb-14 text-base focus:outline-none"
+              />
+              <div className="absolute bottom-3 right-3">
+                <Button
+                  type="submit"
+                  size="icon"
+                  disabled={!input.trim()}
+                  className="h-10 w-10 rounded-xl"
+                >
+                  <Send className="h-4 w-4" />
+                </Button>
               </div>
-            )}
-            <textarea
-              ref={inputRef}
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={handleKeyDown}
-              rows={3}
-              className="w-full resize-none rounded-2xl bg-transparent px-5 py-4 pb-14 text-base focus:outline-none"
-            />
-            <div className="absolute bottom-3 right-3">
-              <Button
-                type="submit"
-                size="icon"
-                disabled={!input.trim()}
-                className="h-10 w-10 rounded-xl"
-              >
-                <Send className="h-4 w-4" />
-              </Button>
             </div>
-          </div>
-        </form>
-
-        {/* Section header with arrows */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div className="h-px w-8 bg-border" />
-            <span className="text-sm font-medium text-muted-foreground">Popular Reads</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => scrollCarousel('left')}
-              disabled={!canScrollLeft}
-              className="h-10 w-10 rounded-full border-border"
-            >
-              <ChevronLeft className="h-5 w-5" />
-            </Button>
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => scrollCarousel('right')}
-              disabled={!canScrollRight && !isLoadingMore}
-              className="h-10 w-10 rounded-full border-border"
-            >
-              <ChevronRight className="h-5 w-5" />
-            </Button>
-          </div>
+          </form>
         </div>
       </div>
 
-      {/* Book carousel - extends beyond container */}
-      <div className="relative z-10 w-full overflow-hidden">
-        <div
-          ref={carouselRef}
-          className="flex gap-5 overflow-x-auto px-[calc(50vw-512px)] py-4 scrollbar-hide"
-          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-        >
-          {isLoadingSuggestions
-            ? INITIAL_BOOKS.map((title) => (
-                <BookCardSkeleton key={title} variant="carousel" />
-              ))
-            : bookSuggestions.map((book) => (
-                <BookCard
-                  key={book.key}
-                  book={book}
-                  variant="carousel"
-                  onClick={() => handleSuggestionClick(book)}
-                />
-              ))}
-          {isLoadingMore && (
-            <>
-              <BookCardSkeleton variant="carousel" />
-              <BookCardSkeleton variant="carousel" />
-            </>
-          )}
+      {/* Popular Reads section - below the fold */}
+      <div className="bg-background px-4 py-12">
+        <div className="mx-auto w-full max-w-4xl">
+          {/* Section header with arrows */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="h-px w-8 bg-border" />
+              <span className="text-sm font-medium text-muted-foreground">Popular Reads</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => scrollCarousel('left')}
+                disabled={!canScrollLeft}
+                className="h-10 w-10 rounded-full border-border"
+              >
+                <ChevronLeft className="h-5 w-5" />
+              </Button>
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => scrollCarousel('right')}
+                disabled={!canScrollRight && !isLoadingMore}
+                className="h-10 w-10 rounded-full border-border"
+              >
+                <ChevronRight className="h-5 w-5" />
+              </Button>
+            </div>
+          </div>
+        </div>
+
+        {/* Book carousel - extends beyond container */}
+        <div className="mt-6 w-full overflow-hidden">
+          <div
+            ref={carouselRef}
+            className="flex gap-5 overflow-x-auto px-[calc(50vw-512px)] py-4 scrollbar-hide"
+            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+          >
+            {isLoadingSuggestions
+              ? INITIAL_BOOKS.map((title) => (
+                  <BookCardSkeleton key={title} variant="carousel" />
+                ))
+              : bookSuggestions.map((book) => (
+                  <BookCard
+                    key={book.key}
+                    book={book}
+                    variant="carousel"
+                    onClick={() => handleSuggestionClick(book)}
+                  />
+                ))}
+            {isLoadingMore && (
+              <>
+                <BookCardSkeleton variant="carousel" />
+                <BookCardSkeleton variant="carousel" />
+              </>
+            )}
+          </div>
         </div>
       </div>
     </div>
