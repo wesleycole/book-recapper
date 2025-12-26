@@ -1,9 +1,6 @@
 import { createServerFn } from '@tanstack/react-start'
 import { searchTavily, type TavilySearchResult } from '~/lib/tavily'
 import { streamMinimaxChat, createBookRecapPrompt } from '~/lib/minimax'
-import { db } from '~/db'
-import { recaps } from '~/db/schema'
-import { desc, eq } from 'drizzle-orm'
 
 export interface RecapRequest {
   bookTitle: string
@@ -16,7 +13,6 @@ export interface RecapStreamResponse {
   type: 'sources' | 'content' | 'done' | 'error'
   data?: string
   sources?: TavilySearchResult[]
-  recapId?: number
 }
 
 export const generateRecap = createServerFn({ method: 'POST' })
@@ -60,23 +56,9 @@ export const generateRecap = createServerFn({ method: 'POST' })
         chunks.push(chunk)
       }
 
-      // Save to database
-      const [saved] = await db
-        .insert(recaps)
-        .values({
-          bookTitle,
-          seriesName: seriesName || null,
-          author: author || null,
-          query: promptQuery,
-          recap: fullContent,
-          sources: JSON.stringify(searchResults.results),
-        })
-        .returning()
-
       return {
         content: fullContent,
         sources: searchResults.results,
-        recapId: saved.id,
       }
     } catch (error) {
       console.error('Error generating recap:', error)
@@ -125,32 +107,15 @@ export const streamRecap = createServerFn({ method: 'POST' })
       const messages = createBookRecapPrompt(promptQuery, searchContext)
 
       // Stream the response
-      let fullContent = ''
-
       for await (const chunk of streamMinimaxChat(messages)) {
-        fullContent += chunk
         yield JSON.stringify({
           type: 'content',
           data: chunk,
         } as RecapStreamResponse)
       }
 
-      // Save to database
-      const [saved] = await db
-        .insert(recaps)
-        .values({
-          bookTitle,
-          seriesName: seriesName || null,
-          author: author || null,
-          query: promptQuery,
-          recap: fullContent,
-          sources: JSON.stringify(searchResults.results),
-        })
-        .returning()
-
       yield JSON.stringify({
         type: 'done',
-        recapId: saved.id,
       } as RecapStreamResponse)
     } catch (error) {
       console.error('Error generating recap:', error)
@@ -158,32 +123,5 @@ export const streamRecap = createServerFn({ method: 'POST' })
         type: 'error',
         data: error instanceof Error ? error.message : 'Failed to generate recap',
       } as RecapStreamResponse)
-    }
-  })
-
-export const getRecentRecaps = createServerFn({ method: 'GET' }).handler(
-  async () => {
-    const recentRecaps = await db
-      .select()
-      .from(recaps)
-      .orderBy(desc(recaps.createdAt))
-      .limit(20)
-
-    return recentRecaps.map((r) => ({
-      ...r,
-      sources: r.sources ? JSON.parse(r.sources) : [],
-    }))
-  }
-)
-
-export const getRecapById = createServerFn({ method: 'GET' })
-  .inputValidator((id: number) => id)
-  .handler(async ({ data: id }) => {
-    const [recap] = await db.select().from(recaps).where(eq(recaps.id, id)).limit(1)
-    if (!recap) return null
-
-    return {
-      ...recap,
-      sources: recap.sources ? JSON.parse(recap.sources) : [],
     }
   })

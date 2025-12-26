@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { createFileRoute } from '@tanstack/react-router'
 import { useState, useCallback } from 'react'
 import { BookOpen, Sparkles, Search, ExternalLink, Loader2 } from 'lucide-react'
 import { Button } from '~/components/ui/button'
@@ -14,7 +14,6 @@ export const Route = createFileRoute('/')({
 })
 
 function HomePage() {
-  const navigate = useNavigate()
   const [bookTitle, setBookTitle] = useState('')
   const [seriesName, setSeriesName] = useState('')
   const [author, setAuthor] = useState('')
@@ -24,7 +23,6 @@ function HomePage() {
   const [sources, setSources] = useState<TavilySearchResult[]>([])
   const [recapContent, setRecapContent] = useState('')
   const [error, setError] = useState<string | null>(null)
-  const [recapId, setRecapId] = useState<number | null>(null)
 
   const handleSubmit = useCallback(
     async (e: React.FormEvent) => {
@@ -35,7 +33,6 @@ function HomePage() {
       setError(null)
       setSources([])
       setRecapContent('')
-      setRecapId(null)
 
       try {
         const stream = await streamRecap({
@@ -63,9 +60,6 @@ function HomePage() {
                 }
                 break
               case 'done':
-                if (parsed.recapId) {
-                  setRecapId(parsed.recapId)
-                }
                 setIsLoading(false)
                 break
               case 'error':
@@ -93,7 +87,6 @@ function HomePage() {
     setSources([])
     setRecapContent('')
     setError(null)
-    setRecapId(null)
   }
 
   return (
@@ -258,20 +251,15 @@ function HomePage() {
         {(recapContent || isLoading) && (
           <Card>
             <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle className="flex items-center gap-2">
-                  <BookOpen className="h-5 w-5" />
-                  {bookTitle}
-                  {seriesName && (
-                    <Badge variant="secondary" className="ml-2">
-                      {seriesName}
-                    </Badge>
-                  )}
-                </CardTitle>
-                {recapId && (
-                  <Badge variant="outline">Saved</Badge>
+              <CardTitle className="flex items-center gap-2">
+                <BookOpen className="h-5 w-5" />
+                {bookTitle}
+                {seriesName && (
+                  <Badge variant="secondary" className="ml-2">
+                    {seriesName}
+                  </Badge>
                 )}
-              </div>
+              </CardTitle>
               {author && (
                 <CardDescription>by {author}</CardDescription>
               )}
