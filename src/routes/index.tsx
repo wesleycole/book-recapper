@@ -161,8 +161,14 @@ function HomePage() {
   }
 
   return (
-    <div className="flex min-h-[calc(100vh-3.5rem)] flex-col items-center justify-center px-4 py-12">
-      <div className="w-full max-w-4xl space-y-12">
+    <div className="relative flex min-h-[calc(100vh-3.5rem)] flex-col items-center justify-center px-4 py-12">
+      {/* Hero background image */}
+      <div
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-15"
+        style={{ backgroundImage: 'url(/hero-background.png)' }}
+      />
+
+      <div className="relative z-10 w-full max-w-4xl space-y-12">
         {/* Hero section */}
         <div className="text-center">
           <h1 className="font-serif text-4xl font-light tracking-tight text-foreground sm:text-5xl">
@@ -226,7 +232,7 @@ function HomePage() {
       </div>
 
       {/* Book carousel - extends beyond container */}
-      <div className="w-full overflow-hidden">
+      <div className="relative z-10 w-full overflow-hidden">
         <div
           ref={carouselRef}
           className="flex gap-5 overflow-x-auto px-[calc(50vw-512px)] py-4 scrollbar-hide"
