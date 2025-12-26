@@ -1,4 +1,5 @@
 import { tanstackStart } from '@tanstack/react-start/plugin/vite'
+import { nitroV2Plugin } from '@tanstack/nitro-v2-vite-plugin'
 import { defineConfig } from 'vite'
 import tsConfigPaths from 'vite-tsconfig-paths'
 import viteReact from '@vitejs/plugin-react'
@@ -15,6 +16,10 @@ export default defineConfig({
     }),
     tanstackStart({
       srcDirectory: 'src',
+    }),
+    nitroV2Plugin({
+      preset: 'vercel',
+      compatibilityDate: '2025-12-26',
     }),
     viteReact(),
   ],
