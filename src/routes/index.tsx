@@ -4,6 +4,8 @@ import { Send, ChevronDown, ChevronUp } from 'lucide-react'
 import { Button } from '~/components/ui/button'
 import { streamRecap, type RecapStreamResponse } from '~/server/recap'
 import type { TavilySearchResult } from '~/lib/tavily'
+import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
 
 export const Route = createFileRoute('/')({
   component: HomePage,
@@ -242,11 +244,13 @@ function HomePage() {
                         <>
                           {message.content && (
                             <div
-                              className={`prose-chat text-[15px] leading-relaxed text-foreground ${
+                              className={`prose-recap ${
                                 message.isStreaming ? 'streaming-cursor' : ''
                               }`}
                             >
-                              {message.content}
+                              <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                                {message.content}
+                              </ReactMarkdown>
                             </div>
                           )}
 
