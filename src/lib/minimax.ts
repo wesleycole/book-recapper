@@ -50,36 +50,63 @@ export async function* streamMinimaxChat(
   const decoder = new TextDecoder()
   let buffer = ''
   let fullContent = ''
+  let chunkCount = 0
+  let lineCount = 0
 
   try {
     while (true) {
       const { done, value } = await reader.read()
-      if (done) break
+      if (done) {
+        console.log('[MiniMax] Stream done. Total read chunks:', chunkCount)
+        break
+      }
 
-      buffer += decoder.decode(value, { stream: true })
+      chunkCount++
+      const decoded = decoder.decode(value, { stream: true })
+      console.log('[MiniMax] Raw chunk #' + chunkCount + ':', decoded.substring(0, 200))
+      buffer += decoded
       const lines = buffer.split('\n')
       buffer = lines.pop() || ''
 
       for (const line of lines) {
+        lineCount++
         const trimmedLine = line.trim()
-        if (!trimmedLine || !trimmedLine.startsWith('data: ')) continue
+        console.log('[MiniMax] Processing line #' + lineCount + ':', trimmedLine.substring(0, 100))
+
+        if (!trimmedLine) {
+          console.log('[MiniMax] Skipping empty line')
+          continue
+        }
+
+        if (!trimmedLine.startsWith('data: ')) {
+          console.log('[MiniMax] Line does not start with "data: ", starts with:', trimmedLine.substring(0, 20))
+          continue
+        }
 
         const data = trimmedLine.slice(6)
-        if (data === '[DONE]') continue
+        if (data === '[DONE]') {
+          console.log('[MiniMax] Received [DONE] marker')
+          continue
+        }
 
         try {
           const parsed: MinimaxStreamChunk = JSON.parse(data)
+          console.log('[MiniMax] Parsed chunk:', JSON.stringify(parsed))
           const content = parsed.choices[0]?.delta?.content
           if (content) {
+            console.log('[MiniMax] Yielding content:', content.substring(0, 50))
             fullContent += content
             yield content
+          } else {
+            console.log('[MiniMax] No content in delta')
           }
-        } catch {
-          // Skip invalid JSON
+        } catch (e) {
+          console.log('[MiniMax] Failed to parse JSON:', data.substring(0, 100), 'Error:', e)
         }
       }
     }
   } finally {
+    console.log('[MiniMax] Releasing reader. Full content length:', fullContent.length)
     reader.releaseLock()
     if (onComplete) {
       onComplete(fullContent)
