@@ -44,34 +44,9 @@ function HomePage() {
   const [loadedBooksIndex, setLoadedBooksIndex] = useState(0)
   const [canScrollLeft, setCanScrollLeft] = useState(false)
   const [canScrollRight, setCanScrollRight] = useState(true)
-  const [mousePosition, setMousePosition] = useState({ x: 0.5, y: 0.5 })
   const inputRef = useRef<HTMLInputElement>(null)
   const carouselRef = useRef<HTMLDivElement>(null)
-  const heroRef = useRef<HTMLDivElement>(null)
   const navigate = useNavigate()
-
-  // Handle mouse movement for perspective effect
-  const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-    if (!heroRef.current) return
-    const rect = heroRef.current.getBoundingClientRect()
-    const x = (e.clientX - rect.left) / rect.width
-    const y = (e.clientY - rect.top) / rect.height
-    setMousePosition({ x, y })
-  }, [])
-
-  const handleMouseLeave = useCallback(() => {
-    setMousePosition({ x: 0.5, y: 0.5 })
-  }, [])
-
-  // Calculate perspective transform based on mouse position
-  const getTransformStyle = () => {
-    const rotateX = (mousePosition.y - 0.5) * -15 // -7.5 to 7.5 degrees
-    const rotateY = (mousePosition.x - 0.5) * 15 // -7.5 to 7.5 degrees
-    return {
-      transform: `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`,
-      transition: 'transform 0.1s ease-out',
-    }
-  }
 
   // Fetch initial books
   useEffect(() => {
@@ -195,29 +170,17 @@ function HomePage() {
   return (
     <div className="flex flex-col">
       {/* Hero Section - Full viewport height */}
-      <div
-        ref={heroRef}
-        className="hero-section relative flex min-h-screen flex-col items-center justify-center overflow-hidden"
-        onMouseMove={handleMouseMove}
-        onMouseLeave={handleMouseLeave}
-      >
-        {/* Background image with perspective effect */}
+      <div className="hero-section relative flex min-h-screen flex-col items-center justify-center overflow-hidden">
+        {/* Background image */}
         <div
-          className="hero-image-container absolute inset-0"
-          style={getTransformStyle()}
-        >
-          {/* Fallback gradient background */}
-          <div className="absolute inset-0 bg-gradient-to-br from-slate-700 via-slate-600 to-teal-900" />
-          {/* Hero image */}
-          <div
-            className="hero-image absolute inset-0 bg-cover bg-center bg-no-repeat"
-            style={{
-              backgroundImage: 'url(/hero-librarian.jpg)',
-            }}
-          />
-          {/* Overlay for better text readability */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-black/40" />
-        </div>
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+          style={{
+            backgroundImage: 'url(/hero-librarian.jpg)',
+            backgroundColor: 'hsl(200 15% 20%)',
+          }}
+        />
+        {/* Overlay for better text readability */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-black/30" />
 
         {/* Hero Content */}
         <div className="hero-content relative z-10 w-full max-w-5xl px-6 text-center">
