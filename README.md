@@ -1,6 +1,8 @@
-# Book Recapper
+# Ask the Librarian
 
-AI-powered book series recap generator built with TanStack Start.
+A friendly AI-powered book recap service to help you remember your favorite stories. Built with TanStack Start.
+
+**Live at [askthelibrarian.app](https://askthelibrarian.app)**
 
 ## Features
 
