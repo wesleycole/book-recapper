@@ -1,12 +1,12 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useState, useCallback } from 'react'
-import { Search, Loader2, Library, BookMarked } from 'lucide-react'
+import { Search, Sparkles } from 'lucide-react'
 import { Button } from '~/components/ui/button'
-import { Input } from '~/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/ui/card'
 import { BookCard, BookCardSkeleton } from '~/components/book-card'
 import { WavyLinesBackground } from '~/components/ui/wavy-lines'
-import { searchBooksServer, searchSeriesServer } from '~/server/books'
+import { SmartSearchInput, type SearchMode } from '~/components/ui/smart-search-input'
+import { searchBooksServer, searchSeriesServer, aiSearchBooksServer } from '~/server/books'
 import type { BookDetails } from '~/lib/openlib'
 
 export const Route = createFileRoute('/browse')({
@@ -16,23 +16,32 @@ export const Route = createFileRoute('/browse')({
 function BrowsePage() {
   const navigate = useNavigate()
   const [searchQuery, setSearchQuery] = useState('')
-  const [searchType, setSearchType] = useState<'books' | 'series'>('series')
   const [isLoading, setIsLoading] = useState(false)
   const [results, setResults] = useState<BookDetails[]>([])
   const [hasSearched, setHasSearched] = useState(false)
+  const [lastSearchMode, setLastSearchMode] = useState<SearchMode>('text')
+  const [aiExplanation, setAiExplanation] = useState('')
 
   const handleSearch = useCallback(
-    async (e: React.FormEvent) => {
-      e.preventDefault()
+    async (mode: SearchMode) => {
       if (!searchQuery.trim()) return
 
       setIsLoading(true)
       setHasSearched(true)
+      setLastSearchMode(mode)
+      setAiExplanation('')
 
       try {
-        const searchFn = searchType === 'series' ? searchSeriesServer : searchBooksServer
-        const data = await searchFn({ data: searchQuery.trim() })
-        setResults(data)
+        if (mode === 'ai') {
+          // Use AI-powered search for complex queries
+          const response = await aiSearchBooksServer({ data: searchQuery.trim() })
+          setResults(response.results)
+          setAiExplanation(response.explanation)
+        } else {
+          // Use standard search for simple queries
+          const data = await searchBooksServer({ data: searchQuery.trim() })
+          setResults(data)
+        }
       } catch (error) {
         console.error('Search error:', error)
         setResults([])
@@ -40,7 +49,7 @@ function BrowsePage() {
         setIsLoading(false)
       }
     },
-    [searchQuery, searchType]
+    [searchQuery]
   )
 
   const handleSelectBook = (book: BookDetails) => {
@@ -53,75 +62,39 @@ function BrowsePage() {
     })
   }
 
+  const handleQuickSearch = (term: string) => {
+    setSearchQuery(term)
+  }
+
   return (
     <div className="container mx-auto px-4 py-8">
       {/* Header */}
-      <div className="mb-10 text-center">
+      <div className="mb-8 text-center">
         <h1 className="font-serif text-4xl font-light tracking-tight text-foreground">
           Browse the <span className="italic">Library</span>
         </h1>
         <p className="mt-3 text-muted-foreground">
-          Search for books and series using the Open Library database
+          Search for books using the Open Library database
         </p>
       </div>
 
-      {/* Search Form */}
-      <div className="mx-auto mb-10 max-w-2xl">
-        <form onSubmit={handleSearch} className="space-y-4">
-          <div className="flex gap-3">
-            <div className="relative flex-1">
-              <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                placeholder="Search for a book or series..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="rounded-xl py-6 pl-12 text-base"
-                disabled={isLoading}
-              />
-            </div>
-            <Button
-              type="submit"
-              disabled={isLoading || !searchQuery.trim()}
-              className="h-auto rounded-xl px-6"
-            >
-              {isLoading ? (
-                <Loader2 className="h-5 w-5 animate-spin" />
-              ) : (
-                'Search'
-              )}
-            </Button>
-          </div>
-          <div className="flex justify-center gap-2">
-            <Button
-              type="button"
-              variant={searchType === 'series' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setSearchType('series')}
-              className="gap-2 rounded-lg"
-            >
-              <Library className="h-4 w-4" />
-              Series
-            </Button>
-            <Button
-              type="button"
-              variant={searchType === 'books' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setSearchType('books')}
-              className="gap-2 rounded-lg"
-            >
-              <BookMarked className="h-4 w-4" />
-              Individual Books
-            </Button>
-          </div>
-        </form>
+      {/* Smart Search Input */}
+      <div className="mx-auto mb-8 max-w-2xl">
+        <SmartSearchInput
+          value={searchQuery}
+          onChange={setSearchQuery}
+          onSubmit={handleSearch}
+          isLoading={isLoading}
+          placeholder="Search for a book or describe what you're looking for..."
+        />
       </div>
 
       {/* Loading State */}
       {isLoading && (
-        <div className="mx-auto max-w-5xl">
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {Array.from({ length: 6 }).map((_, i) => (
-              <BookCardSkeleton key={i} />
+        <div className="mx-auto max-w-6xl">
+          <div className="grid gap-4 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+            {Array.from({ length: 10 }).map((_, i) => (
+              <BookCardSkeleton key={i} variant="grid" />
             ))}
           </div>
         </div>
@@ -129,20 +102,29 @@ function BrowsePage() {
 
       {/* Results */}
       {!isLoading && results.length > 0 && (
-        <div className="mx-auto max-w-5xl">
+        <div className="mx-auto max-w-6xl">
           <div className="mb-6 flex items-center gap-4">
             <div className="h-px flex-1 bg-border" />
-            <span className="text-sm font-medium text-muted-foreground">
-              {results.length} results found
-            </span>
+            <div className="flex items-center gap-2">
+              {lastSearchMode === 'ai' && (
+                <Sparkles className="h-4 w-4 text-purple-500" />
+              )}
+              <span className="text-sm font-medium text-muted-foreground">
+                {results.length} results found
+                {lastSearchMode === 'ai' && aiExplanation && (
+                  <span className="ml-2 text-purple-500">• {aiExplanation}</span>
+                )}
+              </span>
+            </div>
             <div className="h-px flex-1 bg-border" />
           </div>
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-4 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
             {results.map((book) => (
               <BookCard
                 key={book.key}
                 book={book}
                 onClick={() => handleSelectBook(book)}
+                variant="grid"
               />
             ))}
           </div>
@@ -160,7 +142,9 @@ function BrowsePage() {
           </div>
           <h2 className="mb-2 font-serif text-2xl font-light">No results found</h2>
           <p className="text-muted-foreground">
-            Try adjusting your search terms or search for a different book/series.
+            {lastSearchMode === 'ai'
+              ? "Try describing your book differently or use a simpler search term."
+              : "Try adjusting your search terms or type more to enable AI-powered search."}
           </p>
         </div>
       )}
@@ -173,39 +157,63 @@ function BrowsePage() {
             <CardHeader className="relative">
               <CardTitle className="font-serif text-2xl font-light">Discover Your Next Read</CardTitle>
               <CardDescription className="text-base">
-                Search the Open Library database to find books and series, then get
-                AI-powered recaps to refresh your memory.
+                Type a book title for quick search, or describe what you're looking for
+                to enable AI-powered search with the rainbow border effect.
               </CardDescription>
             </CardHeader>
             <CardContent className="relative">
-              <div className="space-y-4">
-                <p className="text-sm font-medium text-muted-foreground">
-                  Popular searches:
-                </p>
-                <div className="flex flex-wrap gap-2">
-                  {[
-                    'Harry Potter',
-                    'The Hunger Games',
-                    'Sherlock Holmes',
-                    'Jack Reacher',
-                    'Outlander',
-                    'The Handmaid\'s Tale',
-                    'The Girl with the Dragon Tattoo',
-                    'Percy Jackson',
-                  ].map((term) => (
-                    <Button
-                      key={term}
-                      variant="secondary"
-                      size="sm"
-                      className="rounded-lg"
-                      onClick={() => {
-                        setSearchQuery(term)
-                        setSearchType('series')
-                      }}
-                    >
-                      {term}
-                    </Button>
-                  ))}
+              <div className="space-y-6">
+                {/* Quick Searches */}
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground mb-3">
+                    Quick searches:
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {[
+                      'Harry Potter',
+                      'The Hunger Games',
+                      'Sherlock Holmes',
+                      'Jack Reacher',
+                      'Outlander',
+                      'Percy Jackson',
+                    ].map((term) => (
+                      <Button
+                        key={term}
+                        variant="secondary"
+                        size="sm"
+                        className="rounded-lg"
+                        onClick={() => handleQuickSearch(term)}
+                      >
+                        {term}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* AI Search Examples */}
+                <div>
+                  <p className="text-sm font-medium text-purple-600 dark:text-purple-400 mb-3 flex items-center gap-2">
+                    <Sparkles className="h-4 w-4" />
+                    Try AI-powered searches:
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {[
+                      'Fantasy books with dragons like Game of Thrones',
+                      'Mystery novels set in Victorian England',
+                      'Science fiction about artificial intelligence',
+                      'Romance books with enemies to lovers trope',
+                    ].map((term) => (
+                      <Button
+                        key={term}
+                        variant="outline"
+                        size="sm"
+                        className="rounded-lg border-purple-200 dark:border-purple-800 text-purple-700 dark:text-purple-300 hover:bg-purple-50 dark:hover:bg-purple-950"
+                        onClick={() => handleQuickSearch(term)}
+                      >
+                        {term}
+                      </Button>
+                    ))}
+                  </div>
                 </div>
               </div>
             </CardContent>

@@ -369,3 +369,85 @@
     display: none;
   }
 }
+
+/* Smart Search - AI Mode Rainbow Gradient Animation */
+@keyframes rainbow-rotate {
+  0% {
+    --gradient-angle: 0deg;
+  }
+  100% {
+    --gradient-angle: 360deg;
+  }
+}
+
+@property --gradient-angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+
+.smart-search-wrapper {
+  position: relative;
+  border-radius: 0.75rem;
+}
+
+.smart-search-wrapper.ai-mode {
+  padding: 2px;
+  background: conic-gradient(
+    from var(--gradient-angle),
+    #ff6b6b,
+    #feca57,
+    #48dbfb,
+    #ff9ff3,
+    #54a0ff,
+    #5f27cd,
+    #ff6b6b
+  );
+  animation: rainbow-rotate 3s linear infinite;
+}
+
+.smart-search-wrapper.ai-mode .smart-search-inner {
+  background: var(--color-card);
+  border-radius: calc(0.75rem - 2px);
+}
+
+.smart-search-wrapper:not(.ai-mode) {
+  background: transparent;
+}
+
+/* Glow effect for AI mode */
+.smart-search-wrapper.ai-mode::before {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: 1rem;
+  background: conic-gradient(
+    from var(--gradient-angle),
+    #ff6b6b40,
+    #feca5740,
+    #48dbfb40,
+    #ff9ff340,
+    #54a0ff40,
+    #5f27cd40,
+    #ff6b6b40
+  );
+  animation: rainbow-rotate 3s linear infinite;
+  filter: blur(8px);
+  z-index: -1;
+}
+
+/* AI mode indicator sparkle */
+@keyframes sparkle {
+  0%, 100% {
+    opacity: 0.5;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.1);
+  }
+}
+
+.ai-indicator {
+  animation: sparkle 1.5s ease-in-out infinite;
+}

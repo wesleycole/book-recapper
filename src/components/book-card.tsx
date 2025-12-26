@@ -7,7 +7,7 @@ import type { BookDetails } from '~/lib/openlib'
 interface BookCardProps {
   book: BookDetails
   onClick?: () => void
-  variant?: 'default' | 'compact' | 'featured' | 'carousel'
+  variant?: 'default' | 'compact' | 'featured' | 'carousel' | 'grid'
   className?: string
 }
 
@@ -15,6 +15,62 @@ export function BookCard({ book, onClick, variant = 'default', className }: Book
   const isFeatured = variant === 'featured'
   const isCompact = variant === 'compact'
   const isCarousel = variant === 'carousel'
+  const isGrid = variant === 'grid'
+
+  // Grid variant - optimized for multi-column grids
+  if (isGrid) {
+    return (
+      <button
+        onClick={onClick}
+        className={cn(
+          'group relative flex flex-col overflow-hidden rounded-lg border border-border bg-card text-left transition-all duration-300',
+          'hover:border-primary/30 hover:shadow-lg',
+          className
+        )}
+      >
+        {/* Wavy lines background */}
+        <div className="absolute inset-0">
+          <WavyLinesBackground className="opacity-30 transition-opacity group-hover:opacity-50" />
+        </div>
+
+        {/* Book cover */}
+        <div className="relative z-10 flex items-center justify-center p-3 pb-2">
+          <div className="aspect-[2/3] w-full max-w-[120px] overflow-hidden rounded-md border border-border/50 bg-card shadow-md transition-transform duration-300 group-hover:scale-105 group-hover:shadow-xl">
+            {book.coverUrl ? (
+              <img
+                src={book.coverUrl}
+                alt={book.title}
+                className="h-full w-full object-cover"
+                loading="lazy"
+              />
+            ) : (
+              <div className="flex h-full w-full items-center justify-center bg-muted">
+                <BookOpen className="h-8 w-8 text-muted-foreground" />
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Book info */}
+        <div className="relative z-10 flex flex-col px-3 pb-3">
+          <h3 className="font-serif text-sm font-semibold leading-tight text-foreground line-clamp-2">
+            {book.title}
+          </h3>
+          {book.authors.length > 0 && (
+            <p className="mt-1 flex items-center gap-1 text-xs text-muted-foreground">
+              <User className="h-2.5 w-2.5 flex-shrink-0" />
+              <span className="line-clamp-1">{book.authors[0]}</span>
+            </p>
+          )}
+          {book.publishYear && (
+            <p className="mt-0.5 text-xs text-muted-foreground/70">
+              {book.publishYear}
+            </p>
+          )}
+        </div>
+      </button>
+    )
+  }
 
   // Carousel variant - large cards with meta at bottom
   if (isCarousel) {
@@ -182,7 +238,7 @@ export function BookCard({ book, onClick, variant = 'default', className }: Book
 }
 
 interface BookCardSkeletonProps {
-  variant?: 'default' | 'compact' | 'featured' | 'carousel'
+  variant?: 'default' | 'compact' | 'featured' | 'carousel' | 'grid'
   className?: string
 }
 
@@ -190,6 +246,31 @@ export function BookCardSkeleton({ variant = 'default', className }: BookCardSke
   const isFeatured = variant === 'featured'
   const isCompact = variant === 'compact'
   const isCarousel = variant === 'carousel'
+  const isGrid = variant === 'grid'
+
+  // Grid variant skeleton
+  if (isGrid) {
+    return (
+      <div
+        className={cn(
+          'relative flex flex-col overflow-hidden rounded-lg border border-border bg-card',
+          className
+        )}
+      >
+        <div className="absolute inset-0">
+          <WavyLinesBackground className="opacity-20" />
+        </div>
+        <div className="relative z-10 flex items-center justify-center p-3 pb-2">
+          <div className="aspect-[2/3] w-full max-w-[120px] animate-pulse rounded-md bg-muted" />
+        </div>
+        <div className="relative z-10 flex flex-col px-3 pb-3 space-y-1.5">
+          <div className="h-4 w-3/4 animate-pulse rounded bg-muted" />
+          <div className="h-3 w-1/2 animate-pulse rounded bg-muted" />
+          <div className="h-3 w-1/3 animate-pulse rounded bg-muted" />
+        </div>
+      </div>
+    )
+  }
 
   // Carousel variant skeleton
   if (isCarousel) {
