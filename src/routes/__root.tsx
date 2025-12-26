@@ -7,7 +7,7 @@ import {
   createRootRoute,
 } from '@tanstack/react-router'
 import * as React from 'react'
-import { BookOpen, Library } from 'lucide-react'
+import { BookOpen, Library, MessageSquare, FileText, Eye } from 'lucide-react'
 import appCss from '~/styles/app.css?url'
 
 export const Route = createRootRoute({
@@ -79,14 +79,27 @@ function RootDocument() {
             <Outlet />
           </main>
           {!isChatPage && (
-            <footer className="border-t border-border/60 py-8">
-              <div className="container mx-auto px-4 text-center">
-                <p className="font-serif text-sm text-muted-foreground">
-                  Ask the Librarian
-                </p>
-                <p className="mt-1 text-xs text-muted-foreground/70">
-                  askthelibrarian.app
-                </p>
+            <footer className="border-t border-border/60 bg-secondary/20 py-4">
+              <div className="container mx-auto px-6">
+                <div className="flex items-center gap-6 text-sm text-muted-foreground">
+                  <div className="flex items-center gap-2">
+                    <MessageSquare className="h-4 w-4" />
+                    <span>29 prompts</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <FileText className="h-4 w-4" />
+                    <span>51 files</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Eye className="h-4 w-4" />
+                    <span className="font-semibold">LIBRARIAN</span>
+                  </div>
+                  <div className="ml-auto flex items-center gap-4 font-mono text-xs">
+                    <span className="text-emerald-600">+543</span>
+                    <span className="text-red-600">-425</span>
+                    <span className="text-amber-600">~170</span>
+                  </div>
+                </div>
               </div>
             </footer>
           )}
