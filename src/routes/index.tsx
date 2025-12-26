@@ -7,15 +7,16 @@ import { searchBooksServer } from '~/server/books'
 import type { BookDetails } from '~/lib/openlib'
 import { useTypingPlaceholder } from '~/hooks/useTypingPlaceholder'
 
-const PLACEHOLDER_EXAMPLES = [
-  "What happened at the end of 1984?",
-  "What happened in books 1-3 of Harry Potter?",
-  "What happened to Gatsby?",
-  "What happened in the Hunger Games trilogy?",
-  "What happened between Elizabeth and Darcy?",
-  "What happened in the first Dune book?",
-  "What happened to Amy in Gone Girl?",
-  "What happened in Lord of the Rings?",
+const PLACEHOLDER_PREFIX = "What happened "
+const PLACEHOLDER_SUFFIXES = [
+  "at the end of 1984?",
+  "in books 1-3 of Harry Potter?",
+  "to Gatsby?",
+  "in the Hunger Games trilogy?",
+  "between Elizabeth and Darcy?",
+  "in the first Dune book?",
+  "to Amy in Gone Girl?",
+  "in Lord of the Rings?",
 ]
 
 const INITIAL_BOOKS = [
@@ -61,11 +62,12 @@ function HomePage() {
   const navigate = useNavigate()
 
   const { displayText: placeholderText } = useTypingPlaceholder({
-    examples: PLACEHOLDER_EXAMPLES,
+    prefix: PLACEHOLDER_PREFIX,
+    suffixes: PLACEHOLDER_SUFFIXES,
     typingSpeed: 50,
-    deletingSpeed: 20,
-    pauseBeforeDelete: 1000,
-    pauseDuration: 300,
+    deletingSpeed: 35,
+    pauseBeforeDelete: 1500,
+    pauseDuration: 400,
   })
 
   // Fetch initial books

@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from 'react'
 
 interface UseTypingPlaceholderOptions {
-  examples: string[]
+  prefix?: string
+  suffixes: string[]
   typingSpeed?: number
   deletingSpeed?: number
   pauseDuration?: number
@@ -11,18 +12,19 @@ interface UseTypingPlaceholderOptions {
 type Phase = 'typing' | 'pausing' | 'deleting' | 'waiting'
 
 export function useTypingPlaceholder({
-  examples,
+  prefix = '',
+  suffixes,
   typingSpeed = 50,
   deletingSpeed = 30,
   pauseDuration = 500,
   pauseBeforeDelete = 1000,
 }: UseTypingPlaceholderOptions) {
-  const [displayText, setDisplayText] = useState('')
+  const [displaySuffix, setDisplaySuffix] = useState('')
   const [currentIndex, setCurrentIndex] = useState(0)
   const [phase, setPhase] = useState<Phase>('typing')
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  const currentExample = examples[currentIndex]
+  const currentSuffix = suffixes[currentIndex]
 
   useEffect(() => {
     // Clear any existing timeout
@@ -32,9 +34,9 @@ export function useTypingPlaceholder({
 
     switch (phase) {
       case 'typing':
-        if (displayText.length < currentExample.length) {
+        if (displaySuffix.length < currentSuffix.length) {
           timeoutRef.current = setTimeout(() => {
-            setDisplayText(currentExample.slice(0, displayText.length + 1))
+            setDisplaySuffix(currentSuffix.slice(0, displaySuffix.length + 1))
           }, typingSpeed)
         } else {
           // Done typing, move to pausing
@@ -49,9 +51,9 @@ export function useTypingPlaceholder({
         break
 
       case 'deleting':
-        if (displayText.length > 0) {
+        if (displaySuffix.length > 0) {
           timeoutRef.current = setTimeout(() => {
-            setDisplayText(displayText.slice(0, -1))
+            setDisplaySuffix(displaySuffix.slice(0, -1))
           }, deletingSpeed)
         } else {
           // Done deleting, move to waiting
@@ -61,7 +63,7 @@ export function useTypingPlaceholder({
 
       case 'waiting':
         timeoutRef.current = setTimeout(() => {
-          setCurrentIndex((prev) => (prev + 1) % examples.length)
+          setCurrentIndex((prev) => (prev + 1) % suffixes.length)
           setPhase('typing')
         }, pauseDuration)
         break
@@ -73,11 +75,11 @@ export function useTypingPlaceholder({
       }
     }
   }, [
-    displayText,
+    displaySuffix,
     phase,
-    currentExample,
+    currentSuffix,
     currentIndex,
-    examples.length,
+    suffixes.length,
     typingSpeed,
     deletingSpeed,
     pauseDuration,
@@ -85,7 +87,7 @@ export function useTypingPlaceholder({
   ])
 
   return {
-    displayText,
+    displayText: prefix + displaySuffix,
     isTyping: phase === 'typing',
     currentIndex,
   }
