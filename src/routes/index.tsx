@@ -166,12 +166,12 @@ function HomePage() {
       style={{
         backgroundImage: 'url(/hero.png)',
         backgroundSize: 'cover',
-        backgroundPosition: 'center',
+        backgroundPosition: '40% center',
         backgroundRepeat: 'no-repeat',
       }}
     >
       {/* Background overlay for better text readability */}
-      <div className="absolute inset-0 bg-background/80 backdrop-blur-sm" />
+      <div className="absolute inset-0 bg-background/50" />
       <div className="relative z-10 w-full max-w-4xl space-y-12">
         {/* Hero section */}
         <div className="text-center">
