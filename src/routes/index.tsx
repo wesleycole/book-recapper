@@ -44,7 +44,7 @@ function HomePage() {
   const [loadedBooksIndex, setLoadedBooksIndex] = useState(0)
   const [canScrollLeft, setCanScrollLeft] = useState(false)
   const [canScrollRight, setCanScrollRight] = useState(true)
-  const inputRef = useRef<HTMLInputElement>(null)
+  const inputRef = useRef<HTMLTextAreaElement>(null)
   const carouselRef = useRef<HTMLDivElement>(null)
   const navigate = useNavigate()
 
@@ -148,8 +148,8 @@ function HomePage() {
     })
   }
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault()
       handleSubmit()
     }
@@ -166,7 +166,7 @@ function HomePage() {
       style={{
         backgroundImage: 'url(/hero.png)',
         backgroundSize: 'cover',
-        backgroundPosition: '40% center',
+        backgroundPosition: '30% center',
         backgroundRepeat: 'no-repeat',
       }}
     >
@@ -184,26 +184,28 @@ function HomePage() {
         </div>
 
         {/* Search form */}
-        <form onSubmit={handleSubmit} className="mx-auto flex max-w-xl items-center gap-3">
-          <div className="relative flex-1">
-            <input
+        <form onSubmit={handleSubmit} className="mx-auto w-full max-w-2xl">
+          <div className="relative rounded-2xl border border-border bg-card shadow-sm">
+            <textarea
               ref={inputRef}
-              type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder="Search for a book..."
-              className="chat-input w-full rounded-xl border border-border bg-card px-5 py-4 text-base placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+              rows={3}
+              className="w-full resize-none rounded-2xl bg-transparent px-5 py-4 pb-14 text-base placeholder:text-muted-foreground focus:outline-none"
             />
+            <div className="absolute bottom-3 right-3">
+              <Button
+                type="submit"
+                size="icon"
+                disabled={!input.trim()}
+                className="h-10 w-10 rounded-xl"
+              >
+                <Send className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
-          <Button
-            type="submit"
-            size="icon"
-            disabled={!input.trim()}
-            className="h-12 w-12 shrink-0 rounded-xl"
-          >
-            <Send className="h-5 w-5" />
-          </Button>
         </form>
 
         {/* Section header with arrows */}
