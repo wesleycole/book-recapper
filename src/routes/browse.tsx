@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { useState, useCallback } from 'react'
-import { Search, Sparkles } from 'lucide-react'
+import { useState, useCallback, useRef, useEffect } from 'react'
+import { Search, Sparkles, Loader2 } from 'lucide-react'
 import { Button } from '~/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/ui/card'
 import { BookCard, BookCardSkeleton } from '~/components/book-card'
@@ -17,10 +17,16 @@ function BrowsePage() {
   const navigate = useNavigate()
   const [searchQuery, setSearchQuery] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+  const [isLoadingMore, setIsLoadingMore] = useState(false)
   const [results, setResults] = useState<BookDetails[]>([])
   const [hasSearched, setHasSearched] = useState(false)
   const [lastSearchMode, setLastSearchMode] = useState<SearchMode>('text')
   const [aiExplanation, setAiExplanation] = useState('')
+  const [currentOffset, setCurrentOffset] = useState(0)
+  const [hasMore, setHasMore] = useState(false)
+  const [totalResults, setTotalResults] = useState(0)
+  const loadMoreRef = useRef<HTMLDivElement>(null)
+  const currentSearchQuery = useRef('')
 
   const handleSearch = useCallback(
     async (mode: SearchMode) => {
@@ -30,27 +36,81 @@ function BrowsePage() {
       setHasSearched(true)
       setLastSearchMode(mode)
       setAiExplanation('')
+      setCurrentOffset(0)
+      currentSearchQuery.current = searchQuery.trim()
 
       try {
         if (mode === 'ai') {
           // Use AI-powered search for complex queries
-          const response = await aiSearchBooksServer({ data: searchQuery.trim() })
+          const response = await aiSearchBooksServer({ data: { query: searchQuery.trim(), offset: 0 } })
           setResults(response.results)
           setAiExplanation(response.explanation)
+          setHasMore(response.hasMore)
+          setTotalResults(response.total)
         } else {
           // Use standard search for simple queries
-          const data = await searchBooksServer({ data: searchQuery.trim() })
-          setResults(data)
+          const data = await searchBooksServer({ data: { query: searchQuery.trim(), offset: 0 } })
+          setResults(data.books)
+          setHasMore(data.hasMore)
+          setTotalResults(data.total)
         }
       } catch (error) {
         console.error('Search error:', error)
         setResults([])
+        setHasMore(false)
+        setTotalResults(0)
       } finally {
         setIsLoading(false)
       }
     },
     [searchQuery]
   )
+
+  const loadMore = useCallback(async () => {
+    if (isLoadingMore || !hasMore || !currentSearchQuery.current) return
+
+    setIsLoadingMore(true)
+    const nextOffset = currentOffset + 20
+
+    try {
+      if (lastSearchMode === 'ai') {
+        const response = await aiSearchBooksServer({
+          data: { query: currentSearchQuery.current, offset: nextOffset }
+        })
+        setResults(prev => [...prev, ...response.results])
+        setHasMore(response.hasMore)
+      } else {
+        const data = await searchBooksServer({
+          data: { query: currentSearchQuery.current, offset: nextOffset }
+        })
+        setResults(prev => [...prev, ...data.books])
+        setHasMore(data.hasMore)
+      }
+      setCurrentOffset(nextOffset)
+    } catch (error) {
+      console.error('Load more error:', error)
+    } finally {
+      setIsLoadingMore(false)
+    }
+  }, [isLoadingMore, hasMore, currentOffset, lastSearchMode])
+
+  // Infinite scroll observer
+  useEffect(() => {
+    if (!loadMoreRef.current || !hasMore) return
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && !isLoadingMore) {
+          loadMore()
+        }
+      },
+      { threshold: 0.1 }
+    )
+
+    observer.observe(loadMoreRef.current)
+
+    return () => observer.disconnect()
+  }, [hasMore, isLoadingMore, loadMore])
 
   const handleSelectBook = (book: BookDetails) => {
     navigate({
@@ -90,9 +150,9 @@ function BrowsePage() {
       </div>
 
       {/* Loading State */}
-      {isLoading && (
+      {isLoading && results.length === 0 && (
         <div className="mx-auto max-w-6xl">
-          <div className="grid gap-4 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+          <div className="grid gap-4 grid-cols-2 sm:grid-cols-3 md:grid-cols-4">
             {Array.from({ length: 10 }).map((_, i) => (
               <BookCardSkeleton key={i} variant="grid" />
             ))}
@@ -110,7 +170,7 @@ function BrowsePage() {
                 <Sparkles className="h-4 w-4 text-purple-500" />
               )}
               <span className="text-sm font-medium text-muted-foreground">
-                {results.length} results found
+                {results.length} of {totalResults} results
                 {lastSearchMode === 'ai' && aiExplanation && (
                   <span className="ml-2 text-purple-500">• {aiExplanation}</span>
                 )}
@@ -118,7 +178,7 @@ function BrowsePage() {
             </div>
             <div className="h-px flex-1 bg-border" />
           </div>
-          <div className="grid gap-4 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+          <div className="grid gap-4 grid-cols-2 sm:grid-cols-3 md:grid-cols-4">
             {results.map((book) => (
               <BookCard
                 key={book.key}
@@ -128,6 +188,27 @@ function BrowsePage() {
               />
             ))}
           </div>
+
+          {/* Infinite scroll sentinel */}
+          {hasMore && (
+            <div ref={loadMoreRef} className="mt-8 flex justify-center py-4">
+              {isLoadingMore && (
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                  <span className="text-sm">Loading more books...</span>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* End of results message */}
+          {!hasMore && results.length > 0 && (
+            <div className="mt-8 flex justify-center py-4">
+              <div className="text-sm text-muted-foreground">
+                You've reached the end of the results
+              </div>
+            </div>
+          )}
         </div>
       )}
 

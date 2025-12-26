@@ -1,5 +1,5 @@
 import { createServerFn } from '@tanstack/react-start'
-import { searchBooks, searchSeries, getBookDetails, type BookDetails } from '~/lib/openlib'
+import { searchBooks, searchSeries, getBookDetails, type BookDetails, type PaginatedSearchResult } from '~/lib/openlib'
 
 interface AISearchTerms {
   searchQueries: string[]
@@ -86,27 +86,36 @@ Only return valid JSON, no other text.`
   }
 }
 
+interface AISearchInput {
+  query: string
+  offset?: number
+}
+
 export const aiSearchBooksServer = createServerFn({ method: 'GET' })
-  .inputValidator((query: string) => query)
-  .handler(async ({ data: query }) => {
+  .inputValidator((input: AISearchInput) => input)
+  .handler(async ({ data }) => {
+    const { query, offset = 0 } = data
     if (!query || query.length < 2) {
-      return { results: [], explanation: '' }
+      return { results: [], explanation: '', total: 0, hasMore: false }
     }
 
     // Extract search terms using AI
     const { searchQueries, explanation } = await extractSearchTerms(query)
     console.log('[AI Search] Queries:', searchQueries, 'Explanation:', explanation)
 
-    // Perform parallel searches
-    const searchPromises = searchQueries.map(q => searchBooks(q, 10))
+    // Perform parallel searches with pagination
+    const limit = 10
+    const searchPromises = searchQueries.map(q => searchBooks(q, limit, offset))
     const searchResults = await Promise.all(searchPromises)
 
     // Combine and deduplicate results
     const seenKeys = new Set<string>()
     const combinedResults: BookDetails[] = []
+    let maxTotal = 0
 
-    for (const results of searchResults) {
-      for (const book of results) {
+    for (const result of searchResults) {
+      maxTotal = Math.max(maxTotal, result.total)
+      for (const book of result.books) {
         if (!seenKeys.has(book.key)) {
           seenKeys.add(book.key)
           combinedResults.push(book)
@@ -114,27 +123,38 @@ export const aiSearchBooksServer = createServerFn({ method: 'GET' })
       }
     }
 
-    // Limit to 20 results
+    // Limit to 20 results per page
+    const paginatedResults = combinedResults.slice(0, 20)
+
     return {
-      results: combinedResults.slice(0, 20),
-      explanation
+      results: paginatedResults,
+      explanation,
+      total: maxTotal,
+      hasMore: offset + paginatedResults.length < maxTotal
     }
   })
 
+interface SearchInput {
+  query: string
+  offset?: number
+}
+
 export const searchBooksServer = createServerFn({ method: 'GET' })
-  .inputValidator((query: string) => query)
-  .handler(async ({ data: query }) => {
+  .inputValidator((input: SearchInput) => input)
+  .handler(async ({ data }) => {
+    const { query, offset = 0 } = data
     if (!query || query.length < 2) {
-      return []
+      return { books: [], total: 0, hasMore: false }
     }
-    return searchBooks(query, 20)
+    return searchBooks(query, 20, offset)
   })
 
 export const searchSeriesServer = createServerFn({ method: 'GET' })
-  .inputValidator((query: string) => query)
-  .handler(async ({ data: query }) => {
+  .inputValidator((input: SearchInput) => input)
+  .handler(async ({ data }) => {
+    const { query, offset = 0 } = data
     if (!query || query.length < 2) {
-      return []
+      return { books: [], total: 0, hasMore: false }
     }
     return searchSeries(query)
   })

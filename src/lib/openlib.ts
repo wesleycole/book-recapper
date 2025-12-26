@@ -25,10 +25,17 @@ export interface BookDetails {
   description?: string
 }
 
-export async function searchBooks(query: string, limit = 20): Promise<BookDetails[]> {
+export interface PaginatedSearchResult {
+  books: BookDetails[]
+  total: number
+  hasMore: boolean
+}
+
+export async function searchBooks(query: string, limit = 20, offset = 0): Promise<PaginatedSearchResult> {
   const params = new URLSearchParams({
     q: query,
     limit: limit.toString(),
+    offset: offset.toString(),
     fields: 'key,title,author_name,first_publish_year,cover_i,edition_count,subject',
   })
 
@@ -39,7 +46,7 @@ export async function searchBooks(query: string, limit = 20): Promise<BookDetail
 
   const data: OpenLibrarySearchResponse = await response.json()
 
-  return data.docs.map((doc) => ({
+  const books = data.docs.map((doc) => ({
     key: doc.key,
     title: doc.title,
     authors: doc.author_name || ['Unknown Author'],
@@ -49,6 +56,12 @@ export async function searchBooks(query: string, limit = 20): Promise<BookDetail
       : undefined,
     subjects: doc.subject?.slice(0, 5),
   }))
+
+  return {
+    books,
+    total: data.numFound,
+    hasMore: offset + books.length < data.numFound,
+  }
 }
 
 export async function getBookDetails(workKey: string): Promise<BookDetails | null> {
@@ -80,7 +93,7 @@ export async function getBookDetails(workKey: string): Promise<BookDetails | nul
   }
 }
 
-export async function searchSeries(query: string): Promise<BookDetails[]> {
+export async function searchSeries(query: string): Promise<PaginatedSearchResult> {
   // Search with series keywords to find book series
-  return searchBooks(`${query} series`, 20)
+  return searchBooks(`${query} series`, 20, 0)
 }
