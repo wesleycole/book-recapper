@@ -1,7 +1,16 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { useState, useRef } from 'react'
-import { Send } from 'lucide-react'
+import { useState, useRef, useEffect } from 'react'
+import { Send, BookOpen } from 'lucide-react'
 import { Button } from '~/components/ui/button'
+import { searchBooksServer } from '~/server/books'
+import type { BookDetails } from '~/lib/openlib'
+
+const SUGGESTED_BOOKS = [
+  'Pride and Prejudice',
+  'Gone Girl',
+  'The Hunger Games',
+  'Harry Potter',
+]
 
 export const Route = createFileRoute('/')({
   component: HomePage,
@@ -13,8 +22,29 @@ function generateChatId(): string {
 
 function HomePage() {
   const [input, setInput] = useState('')
+  const [bookSuggestions, setBookSuggestions] = useState<BookDetails[]>([])
+  const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(true)
   const inputRef = useRef<HTMLInputElement>(null)
   const navigate = useNavigate()
+
+  useEffect(() => {
+    async function fetchBookCovers() {
+      try {
+        const results = await Promise.all(
+          SUGGESTED_BOOKS.map(async (title) => {
+            const books = await searchBooksServer({ data: title })
+            return books[0] || null
+          })
+        )
+        setBookSuggestions(results.filter((book): book is BookDetails => book !== null))
+      } catch (error) {
+        console.error('Failed to fetch book covers:', error)
+      } finally {
+        setIsLoadingSuggestions(false)
+      }
+    }
+    fetchBookCovers()
+  }, [])
 
   const handleSubmit = (e?: React.FormEvent) => {
     e?.preventDefault()
@@ -71,21 +101,42 @@ function HomePage() {
           </Button>
         </form>
 
-        <div className="flex flex-wrap justify-center gap-2">
-          {[
-            'Pride and Prejudice',
-            'Gone Girl',
-            'The Hunger Games',
-            'Harry Potter',
-          ].map((suggestion) => (
-            <button
-              key={suggestion}
-              onClick={() => handleSuggestionClick(suggestion)}
-              className="suggestion-chip rounded-full border border-border bg-card px-4 py-2 text-sm transition-all hover:border-primary hover:bg-accent active:scale-95"
-            >
-              {suggestion}
-            </button>
-          ))}
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+          {isLoadingSuggestions
+            ? SUGGESTED_BOOKS.map((title) => (
+                <div
+                  key={title}
+                  className="flex flex-col items-center gap-2"
+                >
+                  <div className="aspect-[2/3] w-full max-w-[120px] animate-pulse rounded-lg bg-muted" />
+                  <div className="h-4 w-20 animate-pulse rounded bg-muted" />
+                </div>
+              ))
+            : bookSuggestions.map((book) => (
+                <button
+                  key={book.key}
+                  onClick={() => handleSuggestionClick(book.title)}
+                  className="group flex flex-col items-center gap-2 transition-transform hover:scale-105 active:scale-95"
+                >
+                  <div className="aspect-[2/3] w-full max-w-[120px] overflow-hidden rounded-lg border border-border bg-card shadow-md transition-shadow group-hover:shadow-lg">
+                    {book.coverUrl ? (
+                      <img
+                        src={book.coverUrl}
+                        alt={book.title}
+                        className="h-full w-full object-cover"
+                        loading="lazy"
+                      />
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center bg-muted">
+                        <BookOpen className="h-8 w-8 text-muted-foreground" />
+                      </div>
+                    )}
+                  </div>
+                  <span className="line-clamp-2 text-center text-sm font-medium text-foreground">
+                    {book.title}
+                  </span>
+                </button>
+              ))}
         </div>
       </div>
     </div>
