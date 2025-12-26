@@ -358,4 +358,14 @@
   .ring-offset-background {
     --tw-ring-offset-color: var(--color-background);
   }
+
+  /* Hide scrollbar for carousel */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
 }
