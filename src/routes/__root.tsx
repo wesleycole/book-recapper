@@ -15,10 +15,10 @@ export const Route = createRootRoute({
     meta: [
       { charSet: 'utf-8' },
       { name: 'viewport', content: 'width=device-width, initial-scale=1' },
-      { title: 'Book Recapper - AI-Powered Book Series Summaries' },
+      { title: 'The Book Oracle - Your Mystical Guide to Literary Tales' },
       {
         name: 'description',
-        content: 'Get AI-generated recaps of your favorite book series before diving into the next installment.',
+        content: 'Consult the all-knowing Book Oracle for enchanting recaps of your favorite book series, woven with narrative magic.',
       },
     ],
     links: [
@@ -50,7 +50,7 @@ function RootDocument() {
             <div className="container mx-auto flex h-14 items-center px-4">
               <Link to="/" className="flex items-center gap-2 font-semibold">
                 <BookOpen className="h-5 w-5 text-primary" />
-                <span>Book Recapper</span>
+                <span>The Book Oracle</span>
               </Link>
               <nav className="ml-auto flex items-center gap-1">
                 <Link
@@ -82,7 +82,7 @@ function RootDocument() {
           </main>
           {!isHomePage && (
             <footer className="border-t py-6 text-center text-sm text-muted-foreground">
-              <p>Book Recapper - Never forget what happened in your favorite series</p>
+              <p>The Book Oracle - Where ancient wisdom meets the tales of your favorite series</p>
             </footer>
           )}
         </div>
