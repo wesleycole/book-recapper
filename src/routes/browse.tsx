@@ -1,11 +1,11 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useState, useCallback } from 'react'
-import { Search, BookOpen, User, Calendar, Loader2 } from 'lucide-react'
+import { Search, Loader2, Library, BookMarked } from 'lucide-react'
 import { Button } from '~/components/ui/button'
 import { Input } from '~/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/ui/card'
-import { Badge } from '~/components/ui/badge'
-import { Skeleton } from '~/components/ui/skeleton'
+import { BookCard, BookCardSkeleton } from '~/components/book-card'
+import { WavyLinesBackground } from '~/components/ui/wavy-lines'
 import { searchBooksServer, searchSeriesServer } from '~/server/books'
 import type { BookDetails } from '~/lib/openlib'
 
@@ -56,30 +56,36 @@ function BrowsePage() {
   return (
     <div className="container mx-auto px-4 py-8">
       {/* Header */}
-      <div className="mb-8 text-center">
-        <h1 className="mb-2 text-3xl font-bold tracking-tight">Browse Books</h1>
-        <p className="text-muted-foreground">
+      <div className="mb-10 text-center">
+        <h1 className="font-serif text-4xl font-light tracking-tight text-foreground">
+          Browse the <span className="italic">Library</span>
+        </h1>
+        <p className="mt-3 text-muted-foreground">
           Search for books and series using the Open Library database
         </p>
       </div>
 
       {/* Search Form */}
-      <div className="mx-auto mb-8 max-w-2xl">
+      <div className="mx-auto mb-10 max-w-2xl">
         <form onSubmit={handleSearch} className="space-y-4">
-          <div className="flex gap-2">
+          <div className="flex gap-3">
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
               <Input
                 placeholder="Search for a book or series..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
+                className="rounded-xl py-6 pl-12 text-base"
                 disabled={isLoading}
               />
             </div>
-            <Button type="submit" disabled={isLoading || !searchQuery.trim()}>
+            <Button
+              type="submit"
+              disabled={isLoading || !searchQuery.trim()}
+              className="h-auto rounded-xl px-6"
+            >
               {isLoading ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
+                <Loader2 className="h-5 w-5 animate-spin" />
               ) : (
                 'Search'
               )}
@@ -91,7 +97,9 @@ function BrowsePage() {
               variant={searchType === 'series' ? 'default' : 'outline'}
               size="sm"
               onClick={() => setSearchType('series')}
+              className="gap-2 rounded-lg"
             >
+              <Library className="h-4 w-4" />
               Series
             </Button>
             <Button
@@ -99,7 +107,9 @@ function BrowsePage() {
               variant={searchType === 'books' ? 'default' : 'outline'}
               size="sm"
               onClick={() => setSearchType('books')}
+              className="gap-2 rounded-lg"
             >
+              <BookMarked className="h-4 w-4" />
               Individual Books
             </Button>
           </div>
@@ -108,21 +118,10 @@ function BrowsePage() {
 
       {/* Loading State */}
       {isLoading && (
-        <div className="mx-auto max-w-4xl">
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mx-auto max-w-5xl">
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {Array.from({ length: 6 }).map((_, i) => (
-              <Card key={i}>
-                <CardContent className="p-4">
-                  <div className="flex gap-4">
-                    <Skeleton className="h-32 w-24 flex-shrink-0" />
-                    <div className="flex-1 space-y-2">
-                      <Skeleton className="h-4 w-3/4" />
-                      <Skeleton className="h-3 w-1/2" />
-                      <Skeleton className="h-3 w-1/4" />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+              <BookCardSkeleton key={i} />
             ))}
           </div>
         </div>
@@ -130,64 +129,21 @@ function BrowsePage() {
 
       {/* Results */}
       {!isLoading && results.length > 0 && (
-        <div className="mx-auto max-w-4xl">
-          <p className="mb-4 text-sm text-muted-foreground">
-            Found {results.length} results
-          </p>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mx-auto max-w-5xl">
+          <div className="mb-6 flex items-center gap-4">
+            <div className="h-px flex-1 bg-border" />
+            <span className="text-sm font-medium text-muted-foreground">
+              {results.length} results found
+            </span>
+            <div className="h-px flex-1 bg-border" />
+          </div>
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {results.map((book) => (
-              <Card
+              <BookCard
                 key={book.key}
-                className="cursor-pointer transition-colors hover:bg-accent"
+                book={book}
                 onClick={() => handleSelectBook(book)}
-              >
-                <CardContent className="p-4">
-                  <div className="flex gap-4">
-                    {book.coverUrl ? (
-                      <img
-                        src={book.coverUrl}
-                        alt={book.title}
-                        className="h-32 w-24 flex-shrink-0 rounded object-cover"
-                        loading="lazy"
-                      />
-                    ) : (
-                      <div className="flex h-32 w-24 flex-shrink-0 items-center justify-center rounded bg-muted">
-                        <BookOpen className="h-8 w-8 text-muted-foreground" />
-                      </div>
-                    )}
-                    <div className="flex flex-1 flex-col">
-                      <h3 className="line-clamp-2 font-medium leading-tight">
-                        {book.title}
-                      </h3>
-                      {book.authors.length > 0 && (
-                        <p className="mt-1 flex items-center gap-1 text-sm text-muted-foreground">
-                          <User className="h-3 w-3" />
-                          <span className="line-clamp-1">{book.authors.join(', ')}</span>
-                        </p>
-                      )}
-                      {book.publishYear && (
-                        <p className="mt-1 flex items-center gap-1 text-sm text-muted-foreground">
-                          <Calendar className="h-3 w-3" />
-                          {book.publishYear}
-                        </p>
-                      )}
-                      {book.subjects && book.subjects.length > 0 && (
-                        <div className="mt-2 flex flex-wrap gap-1">
-                          {book.subjects.slice(0, 2).map((subject) => (
-                            <Badge
-                              key={subject}
-                              variant="secondary"
-                              className="text-xs"
-                            >
-                              {subject}
-                            </Badge>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+              />
             ))}
           </div>
         </div>
@@ -196,12 +152,13 @@ function BrowsePage() {
       {/* No Results */}
       {!isLoading && hasSearched && results.length === 0 && (
         <div className="mx-auto max-w-md text-center">
-          <div className="mb-4 flex justify-center">
-            <div className="rounded-full bg-muted p-4">
-              <Search className="h-8 w-8 text-muted-foreground" />
+          <div className="relative mx-auto mb-6 h-24 w-24 overflow-hidden rounded-2xl border border-border bg-card">
+            <WavyLinesBackground className="opacity-50" />
+            <div className="relative flex h-full w-full items-center justify-center">
+              <Search className="h-10 w-10 text-muted-foreground" />
             </div>
           </div>
-          <h2 className="mb-2 text-xl font-semibold">No results found</h2>
+          <h2 className="mb-2 font-serif text-2xl font-light">No results found</h2>
           <p className="text-muted-foreground">
             Try adjusting your search terms or search for a different book/series.
           </p>
@@ -210,19 +167,20 @@ function BrowsePage() {
 
       {/* Initial State */}
       {!isLoading && !hasSearched && (
-        <div className="mx-auto max-w-2xl">
-          <Card>
-            <CardHeader>
-              <CardTitle>Discover Books</CardTitle>
-              <CardDescription>
+        <div className="mx-auto max-w-3xl">
+          <Card className="relative overflow-hidden">
+            <WavyLinesBackground className="opacity-40" />
+            <CardHeader className="relative">
+              <CardTitle className="font-serif text-2xl font-light">Discover Your Next Read</CardTitle>
+              <CardDescription className="text-base">
                 Search the Open Library database to find books and series, then get
                 AI-powered recaps to refresh your memory.
               </CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="relative">
               <div className="space-y-4">
-                <p className="text-sm text-muted-foreground">
-                  Try searching for:
+                <p className="text-sm font-medium text-muted-foreground">
+                  Popular searches:
                 </p>
                 <div className="flex flex-wrap gap-2">
                   {[
@@ -237,8 +195,9 @@ function BrowsePage() {
                   ].map((term) => (
                     <Button
                       key={term}
-                      variant="outline"
+                      variant="secondary"
                       size="sm"
+                      className="rounded-lg"
                       onClick={() => {
                         setSearchQuery(term)
                         setSearchType('series')

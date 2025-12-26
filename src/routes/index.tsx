@@ -1,7 +1,8 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useState, useRef, useEffect } from 'react'
-import { Send, BookOpen } from 'lucide-react'
+import { Send } from 'lucide-react'
 import { Button } from '~/components/ui/button'
+import { BookCard, BookCardSkeleton } from '~/components/book-card'
 import { searchBooksServer } from '~/server/books'
 import type { BookDetails } from '~/lib/openlib'
 
@@ -65,21 +66,26 @@ function HomePage() {
     }
   }
 
-  const handleSuggestionClick = (text: string) => {
-    setInput(text)
+  const handleSuggestionClick = (book: BookDetails) => {
+    setInput(book.title)
     inputRef.current?.focus()
   }
 
   return (
-    <div className="flex h-[calc(100vh-3.5rem)] flex-col items-center justify-center px-4">
-      <div className="w-full max-w-2xl space-y-8">
+    <div className="flex min-h-[calc(100vh-3.5rem)] flex-col items-center justify-center px-4 py-12">
+      <div className="w-full max-w-4xl space-y-12">
+        {/* Hero section */}
         <div className="text-center">
-          <p className="text-lg text-muted-foreground">
-            What book would you like to recap?
+          <h1 className="font-serif text-4xl font-light tracking-tight text-foreground sm:text-5xl">
+            Rediscover <span className="italic">Your</span> Books
+          </h1>
+          <p className="mt-4 text-lg text-muted-foreground">
+            Get AI-powered recaps to refresh your memory before the next chapter
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="flex items-center gap-2">
+        {/* Search form */}
+        <form onSubmit={handleSubmit} className="mx-auto flex max-w-xl items-center gap-3">
           <div className="relative flex-1">
             <input
               ref={inputRef}
@@ -87,55 +93,40 @@ function HomePage() {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="Ask about a book..."
-              className="chat-input w-full rounded-full border border-border bg-card px-4 py-3 pr-12 text-[15px] placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+              placeholder="Search for a book..."
+              className="chat-input w-full rounded-xl border border-border bg-card px-5 py-4 text-base placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
             />
           </div>
           <Button
             type="submit"
             size="icon"
             disabled={!input.trim()}
-            className="send-button h-11 w-11 shrink-0 rounded-full"
+            className="h-12 w-12 shrink-0 rounded-xl"
           >
-            <Send className="h-4 w-4" />
+            <Send className="h-5 w-5" />
           </Button>
         </form>
 
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+        {/* Section divider */}
+        <div className="flex items-center gap-4">
+          <div className="h-px flex-1 bg-border" />
+          <span className="text-sm font-medium text-muted-foreground">Popular Reads</span>
+          <div className="h-px flex-1 bg-border" />
+        </div>
+
+        {/* Book suggestions with wavy cards */}
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {isLoadingSuggestions
             ? SUGGESTED_BOOKS.map((title) => (
-                <div
-                  key={title}
-                  className="flex flex-col items-center gap-2"
-                >
-                  <div className="aspect-[2/3] w-full max-w-[120px] animate-pulse rounded-lg bg-muted" />
-                  <div className="h-4 w-20 animate-pulse rounded bg-muted" />
-                </div>
+                <BookCardSkeleton key={title} variant="featured" />
               ))
             : bookSuggestions.map((book) => (
-                <button
+                <BookCard
                   key={book.key}
-                  onClick={() => handleSuggestionClick(book.title)}
-                  className="group flex flex-col items-center gap-2 transition-transform hover:scale-105 active:scale-95"
-                >
-                  <div className="aspect-[2/3] w-full max-w-[120px] overflow-hidden rounded-lg border border-border bg-card shadow-md transition-shadow group-hover:shadow-lg">
-                    {book.coverUrl ? (
-                      <img
-                        src={book.coverUrl}
-                        alt={book.title}
-                        className="h-full w-full object-cover"
-                        loading="lazy"
-                      />
-                    ) : (
-                      <div className="flex h-full w-full items-center justify-center bg-muted">
-                        <BookOpen className="h-8 w-8 text-muted-foreground" />
-                      </div>
-                    )}
-                  </div>
-                  <span className="line-clamp-2 text-center text-sm font-medium text-foreground">
-                    {book.title}
-                  </span>
-                </button>
+                  book={book}
+                  variant="featured"
+                  onClick={() => handleSuggestionClick(book)}
+                />
               ))}
         </div>
       </div>
