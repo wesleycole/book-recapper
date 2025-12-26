@@ -70,6 +70,7 @@ function HomePage() {
           },
         })
 
+        let hasReceivedContent = false
         for await (const chunk of stream) {
           try {
             const parsed: RecapStreamResponse = JSON.parse(chunk)
@@ -88,6 +89,7 @@ function HomePage() {
                 break
               case 'content':
                 if (parsed.data) {
+                  hasReceivedContent = true
                   setMessages((prev) =>
                     prev.map((msg) =>
                       msg.id === assistantMessage.id
@@ -105,7 +107,6 @@ function HomePage() {
                       : msg
                   )
                 )
-                setIsLoading(false)
                 break
               case 'error':
                 setMessages((prev) =>
@@ -121,14 +122,25 @@ function HomePage() {
                       : msg
                   )
                 )
-                setIsLoading(false)
                 break
             }
-          } catch {
-            // Skip invalid JSON chunks
+          } catch (parseErr) {
+            console.error('Failed to parse chunk:', chunk, parseErr)
           }
         }
+
+        // If stream ended without 'done' message, mark as complete
+        if (hasReceivedContent) {
+          setMessages((prev) =>
+            prev.map((msg) =>
+              msg.id === assistantMessage.id
+                ? { ...msg, isStreaming: false }
+                : msg
+            )
+          )
+        }
       } catch (err) {
+        console.error('Stream error:', err)
         setMessages((prev) =>
           prev.map((msg) =>
             msg.id === assistantMessage.id
@@ -142,6 +154,8 @@ function HomePage() {
               : msg
           )
         )
+      } finally {
+        // Always reset loading state when stream completes or fails
         setIsLoading(false)
       }
     },
@@ -164,7 +178,7 @@ function HomePage() {
     <div className="chat-container flex h-[calc(100vh-4rem)] flex-col">
       {/* Messages Area */}
       <div className="flex-1 overflow-y-auto">
-        <div className="mx-auto max-w-2xl px-4 py-6">
+        <div className="mx-auto max-w-2xl px-4 py-4">
           {messages.length === 0 ? (
             <div className="flex min-h-[60vh] flex-col items-center justify-center px-4">
               <p className="mb-8 text-center text-lg text-muted-foreground">
@@ -188,7 +202,7 @@ function HomePage() {
               </div>
             </div>
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-4 pt-2">
               {messages.map((message) => (
                 <div
                   key={message.id}
@@ -211,16 +225,18 @@ function HomePage() {
                         </div>
                       ) : (
                         <>
-                          <div
-                            className={`prose-chat text-[15px] leading-relaxed text-foreground ${
-                              message.isStreaming ? 'streaming-cursor' : ''
-                            }`}
-                          >
-                            {message.content}
-                          </div>
+                          {message.content && (
+                            <div
+                              className={`prose-chat text-[15px] leading-relaxed text-foreground ${
+                                message.isStreaming ? 'streaming-cursor' : ''
+                              }`}
+                            >
+                              {message.content}
+                            </div>
+                          )}
 
                           {/* Collapsible sources */}
-                          {message.sources && message.sources.length > 0 && !message.isStreaming && (
+                          {message.sources && message.sources.length > 0 && (
                             <div className="sources-section">
                               <button
                                 onClick={() => toggleSources(message.id)}
