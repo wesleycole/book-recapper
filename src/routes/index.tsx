@@ -9,13 +9,13 @@ import { useTypingPlaceholder } from '~/hooks/useTypingPlaceholder'
 
 const PLACEHOLDER_EXAMPLES = [
   "What happened at the end of 1984?",
-  "Remind me who Gatsby really was...",
-  "What's the twist in Gone Girl?",
-  "Summarize the plot of Dune",
-  "Who are the main characters in Pride and Prejudice?",
-  "What was the Hunger Games about again?",
-  "Explain the ending of The Great Gatsby",
-  "What happened to Harry in Order of the Phoenix?",
+  "What happened in books 1-3 of Harry Potter?",
+  "What happened to Gatsby?",
+  "What happened in the Hunger Games trilogy?",
+  "What happened between Elizabeth and Darcy?",
+  "What happened in the first Dune book?",
+  "What happened to Amy in Gone Girl?",
+  "What happened in Lord of the Rings?",
 ]
 
 const INITIAL_BOOKS = [
@@ -63,9 +63,9 @@ function HomePage() {
   const { displayText: placeholderText } = useTypingPlaceholder({
     examples: PLACEHOLDER_EXAMPLES,
     typingSpeed: 50,
-    deletingSpeed: 25,
-    pauseBeforeDelete: 2500,
-    pauseDuration: 500,
+    deletingSpeed: 20,
+    pauseBeforeDelete: 1000,
+    pauseDuration: 300,
   })
 
   // Fetch initial books
