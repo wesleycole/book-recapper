@@ -43,6 +43,10 @@
   --radius-lg: 0.5rem;
   --radius-md: calc(0.5rem - 2px);
   --radius-sm: calc(0.5rem - 4px);
+
+  /* Book reading font families */
+  --font-serif: 'Charter', 'Bitstream Charter', 'Georgia', 'Iowan Old Style', 'Palatino Linotype', 'URW Palladio L', 'P052', serif;
+  --font-sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
 /* Dark mode colors */
@@ -80,6 +84,16 @@
   body {
     @apply bg-background text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+
+@layer utilities {
+  .font-serif {
+    font-family: var(--font-serif);
+  }
+
+  .font-sans {
+    font-family: var(--font-sans);
   }
 }
 
@@ -148,10 +162,25 @@
   50% { opacity: 0; }
 }
 
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
 .streaming-cursor::after {
-  content: '\25CB';
-  animation: blink 1s infinite;
+  content: '▋';
+  animation: blink 0.8s ease-in-out infinite;
   @apply text-primary ml-0.5;
+  display: inline-block;
+}
+
+/* Enhanced text rendering for better readability */
+.font-serif {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  letter-spacing: 0.01em;
+  line-height: 1.75;
 }
 
 /* Ring offset background for focus states */

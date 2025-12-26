@@ -1,11 +1,9 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { useState, useCallback } from 'react'
-import { BookOpen, Sparkles, Search, ExternalLink, Loader2 } from 'lucide-react'
+import { useState, useCallback, useRef, useEffect } from 'react'
+import { BookOpen, Send, Loader2, ExternalLink, Sparkles } from 'lucide-react'
 import { Button } from '~/components/ui/button'
-import { Input } from '~/components/ui/input'
 import { Textarea } from '~/components/ui/textarea'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/ui/card'
-import { Badge } from '~/components/ui/badge'
+import { Card, CardContent } from '~/components/ui/card'
 import { streamRecap, type RecapStreamResponse } from '~/server/recap'
 import type { TavilySearchResult } from '~/lib/tavily'
 
@@ -13,34 +11,55 @@ export const Route = createFileRoute('/')({
   component: HomePage,
 })
 
-function HomePage() {
-  const [bookTitle, setBookTitle] = useState('')
-  const [seriesName, setSeriesName] = useState('')
-  const [author, setAuthor] = useState('')
-  const [additionalContext, setAdditionalContext] = useState('')
+interface Message {
+  id: string
+  role: 'user' | 'assistant'
+  content: string
+  sources?: TavilySearchResult[]
+  isStreaming?: boolean
+}
 
+function HomePage() {
+  const [messages, setMessages] = useState<Message[]>([])
+  const [input, setInput] = useState('')
   const [isLoading, setIsLoading] = useState(false)
-  const [sources, setSources] = useState<TavilySearchResult[]>([])
-  const [recapContent, setRecapContent] = useState('')
-  const [error, setError] = useState<string | null>(null)
+  const messagesEndRef = useRef<HTMLDivElement>(null)
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }
+
+  useEffect(() => {
+    scrollToBottom()
+  }, [messages])
 
   const handleSubmit = useCallback(
-    async (e: React.FormEvent) => {
-      e.preventDefault()
-      if (!bookTitle.trim()) return
+    async (e?: React.FormEvent) => {
+      e?.preventDefault()
+      if (!input.trim() || isLoading) return
 
+      const userMessage: Message = {
+        id: Date.now().toString(),
+        role: 'user',
+        content: input.trim(),
+      }
+
+      const assistantMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        role: 'assistant',
+        content: '',
+        isStreaming: true,
+      }
+
+      setMessages((prev) => [...prev, userMessage, assistantMessage])
+      setInput('')
       setIsLoading(true)
-      setError(null)
-      setSources([])
-      setRecapContent('')
 
       try {
         const stream = await streamRecap({
           data: {
-            bookTitle: bookTitle.trim(),
-            seriesName: seriesName.trim() || undefined,
-            author: author.trim() || undefined,
-            additionalContext: additionalContext.trim() || undefined,
+            bookTitle: input.trim(),
           },
         })
 
@@ -51,19 +70,50 @@ function HomePage() {
             switch (parsed.type) {
               case 'sources':
                 if (parsed.sources) {
-                  setSources(parsed.sources)
+                  setMessages((prev) =>
+                    prev.map((msg) =>
+                      msg.id === assistantMessage.id
+                        ? { ...msg, sources: parsed.sources }
+                        : msg
+                    )
+                  )
                 }
                 break
               case 'content':
                 if (parsed.data) {
-                  setRecapContent((prev) => prev + parsed.data)
+                  setMessages((prev) =>
+                    prev.map((msg) =>
+                      msg.id === assistantMessage.id
+                        ? { ...msg, content: msg.content + parsed.data }
+                        : msg
+                    )
+                  )
                 }
                 break
               case 'done':
+                setMessages((prev) =>
+                  prev.map((msg) =>
+                    msg.id === assistantMessage.id
+                      ? { ...msg, isStreaming: false }
+                      : msg
+                  )
+                )
                 setIsLoading(false)
                 break
               case 'error':
-                setError(parsed.data || 'An error occurred')
+                setMessages((prev) =>
+                  prev.map((msg) =>
+                    msg.id === assistantMessage.id
+                      ? {
+                          ...msg,
+                          content:
+                            'Sorry, I encountered an error: ' +
+                            (parsed.data || 'An error occurred'),
+                          isStreaming: false,
+                        }
+                      : msg
+                  )
+                )
                 setIsLoading(false)
                 break
             }
@@ -72,245 +122,187 @@ function HomePage() {
           }
         }
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'An error occurred')
+        setMessages((prev) =>
+          prev.map((msg) =>
+            msg.id === assistantMessage.id
+              ? {
+                  ...msg,
+                  content:
+                    'Sorry, I encountered an error: ' +
+                    (err instanceof Error ? err.message : 'An error occurred'),
+                  isStreaming: false,
+                }
+              : msg
+          )
+        )
         setIsLoading(false)
       }
     },
-    [bookTitle, seriesName, author, additionalContext]
+    [input, isLoading]
   )
 
-  const handleReset = () => {
-    setBookTitle('')
-    setSeriesName('')
-    setAuthor('')
-    setAdditionalContext('')
-    setSources([])
-    setRecapContent('')
-    setError(null)
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault()
+      handleSubmit()
+    }
+  }
+
+  const handleSuggestionClick = (text: string) => {
+    setInput(text)
+    textareaRef.current?.focus()
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      {/* Hero Section */}
-      {!recapContent && !isLoading && (
-        <div className="mb-12 text-center">
-          <div className="mb-4 flex justify-center">
-            <div className="rounded-full bg-primary/10 p-4">
-              <BookOpen className="h-12 w-12 text-primary" />
+    <div className="flex h-[calc(100vh-4rem)] flex-col">
+      {/* Messages Area */}
+      <div className="flex-1 overflow-y-auto px-4 py-8">
+        <div className="mx-auto max-w-3xl">
+          {messages.length === 0 ? (
+            <div className="flex min-h-full flex-col items-center justify-center text-center">
+              <div className="mb-6 rounded-full bg-primary/10 p-6">
+                <BookOpen className="h-16 w-16 text-primary" />
+              </div>
+              <h1 className="mb-4 text-4xl font-bold tracking-tight">
+                Book Recapper
+              </h1>
+              <p className="mb-12 max-w-2xl font-serif text-lg leading-relaxed text-muted-foreground">
+                Ask me about any book or series you'd like to recap. I'll help you remember
+                what happened before you dive into the next installment.
+              </p>
+
+              {/* Suggestions */}
+              <div className="w-full max-w-2xl">
+                <p className="mb-4 text-sm font-medium text-muted-foreground">
+                  Try asking about:
+                </p>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  {[
+                    'The Way of Kings by Brandon Sanderson',
+                    'A Game of Thrones',
+                    'The Name of the Wind',
+                    'Mistborn: The Final Empire',
+                  ].map((suggestion) => (
+                    <button
+                      key={suggestion}
+                      onClick={() => handleSuggestionClick(suggestion)}
+                      className="rounded-lg border bg-card p-4 text-left transition-colors hover:bg-accent hover:border-primary"
+                    >
+                      <p className="font-serif text-sm">{suggestion}</p>
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
-          </div>
-          <h1 className="mb-4 text-4xl font-bold tracking-tight">
-            Never Forget What Happened
-          </h1>
-          <p className="mx-auto max-w-2xl text-lg text-muted-foreground">
-            Get AI-powered recaps of your favorite book series. Perfect for when a new
-            book comes out and you need to remember what happened in the previous ones.
+          ) : (
+            <div className="space-y-6">
+              {messages.map((message) => (
+                <div
+                  key={message.id}
+                  className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                >
+                  <div
+                    className={`max-w-[85%] ${
+                      message.role === 'user'
+                        ? 'rounded-2xl bg-primary px-4 py-3 text-primary-foreground'
+                        : 'w-full'
+                    }`}
+                  >
+                    {message.role === 'user' ? (
+                      <p className="font-serif text-base leading-relaxed whitespace-pre-wrap">
+                        {message.content}
+                      </p>
+                    ) : (
+                      <div className="space-y-4">
+                        {/* Sources */}
+                        {message.sources && message.sources.length > 0 && (
+                          <Card className="bg-muted/50">
+                            <CardContent className="p-4">
+                              <div className="mb-2 flex items-center gap-2 text-sm font-medium">
+                                <ExternalLink className="h-4 w-4" />
+                                <span>Sources</span>
+                              </div>
+                              <div className="grid gap-2 sm:grid-cols-2">
+                                {message.sources.map((source, index) => (
+                                  <a
+                                    key={index}
+                                    href={source.url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="group block rounded-lg border bg-background p-3 transition-colors hover:border-primary"
+                                  >
+                                    <p className="mb-1 line-clamp-1 text-sm font-medium group-hover:text-primary">
+                                      {source.title}
+                                    </p>
+                                    <p className="line-clamp-1 text-xs text-muted-foreground">
+                                      {new URL(source.url).hostname}
+                                    </p>
+                                  </a>
+                                ))}
+                              </div>
+                            </CardContent>
+                          </Card>
+                        )}
+
+                        {/* Content */}
+                        <div
+                          className={`font-serif text-base leading-relaxed prose-headings:font-sans prose-headings:font-semibold ${
+                            message.isStreaming ? 'streaming-cursor' : ''
+                          }`}
+                        >
+                          {message.content ? (
+                            <div className="whitespace-pre-wrap">{message.content}</div>
+                          ) : (
+                            <div className="flex items-center gap-2 text-muted-foreground">
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                              <span className="font-sans text-sm">
+                                Searching and generating recap...
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
+              <div ref={messagesEndRef} />
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Input Area */}
+      <div className="border-t bg-background px-4 py-4">
+        <div className="mx-auto max-w-3xl">
+          <form onSubmit={handleSubmit} className="flex gap-3">
+            <Textarea
+              ref={textareaRef}
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder="Ask about any book... (e.g., 'The Way of Kings' or 'Recap A Game of Thrones')"
+              disabled={isLoading}
+              rows={1}
+              className="min-h-[52px] max-h-32 resize-none font-serif text-base"
+            />
+            <Button
+              type="submit"
+              size="icon"
+              disabled={isLoading || !input.trim()}
+              className="h-[52px] w-[52px] shrink-0"
+            >
+              {isLoading ? (
+                <Loader2 className="h-5 w-5 animate-spin" />
+              ) : (
+                <Send className="h-5 w-5" />
+              )}
+            </Button>
+          </form>
+          <p className="mt-2 text-center text-xs text-muted-foreground">
+            Press Enter to send, Shift+Enter for new line
           </p>
         </div>
-      )}
-
-      <div className="mx-auto max-w-4xl">
-        {/* Search Form */}
-        <Card className="mb-8">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Search className="h-5 w-5" />
-              Request a Recap
-            </CardTitle>
-            <CardDescription>
-              Enter the book or series you want to recap. The more details you provide,
-              the better the summary.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div className="space-y-2">
-                  <label htmlFor="bookTitle" className="text-sm font-medium">
-                    Book Title <span className="text-destructive">*</span>
-                  </label>
-                  <Input
-                    id="bookTitle"
-                    placeholder="e.g., The Way of Kings"
-                    value={bookTitle}
-                    onChange={(e) => setBookTitle(e.target.value)}
-                    disabled={isLoading}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label htmlFor="seriesName" className="text-sm font-medium">
-                    Series Name
-                  </label>
-                  <Input
-                    id="seriesName"
-                    placeholder="e.g., The Stormlight Archive"
-                    value={seriesName}
-                    onChange={(e) => setSeriesName(e.target.value)}
-                    disabled={isLoading}
-                  />
-                </div>
-              </div>
-              <div className="space-y-2">
-                <label htmlFor="author" className="text-sm font-medium">
-                  Author
-                </label>
-                <Input
-                  id="author"
-                  placeholder="e.g., Brandon Sanderson"
-                  value={author}
-                  onChange={(e) => setAuthor(e.target.value)}
-                  disabled={isLoading}
-                />
-              </div>
-              <div className="space-y-2">
-                <label htmlFor="context" className="text-sm font-medium">
-                  Additional Context
-                </label>
-                <Textarea
-                  id="context"
-                  placeholder="Any specific details you want to focus on, characters to highlight, or questions you have..."
-                  value={additionalContext}
-                  onChange={(e) => setAdditionalContext(e.target.value)}
-                  disabled={isLoading}
-                  rows={3}
-                />
-              </div>
-              <div className="flex gap-3">
-                <Button type="submit" disabled={isLoading || !bookTitle.trim()}>
-                  {isLoading ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Generating...
-                    </>
-                  ) : (
-                    <>
-                      <Sparkles className="mr-2 h-4 w-4" />
-                      Generate Recap
-                    </>
-                  )}
-                </Button>
-                {(recapContent || error) && (
-                  <Button type="button" variant="outline" onClick={handleReset}>
-                    Start Over
-                  </Button>
-                )}
-              </div>
-            </form>
-          </CardContent>
-        </Card>
-
-        {/* Error Display */}
-        {error && (
-          <Card className="mb-8 border-destructive">
-            <CardContent className="pt-6">
-              <p className="text-destructive">{error}</p>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Sources Section */}
-        {sources.length > 0 && (
-          <Card className="mb-8">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-lg">
-                <ExternalLink className="h-4 w-4" />
-                Sources
-              </CardTitle>
-              <CardDescription>
-                Web sources used to ground the recap
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid gap-3 sm:grid-cols-2">
-                {sources.map((source, index) => (
-                  <a
-                    key={index}
-                    href={source.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="group block rounded-lg border p-3 transition-colors hover:bg-accent"
-                  >
-                    <p className="mb-1 line-clamp-1 font-medium group-hover:text-primary">
-                      {source.title}
-                    </p>
-                    <p className="line-clamp-2 text-sm text-muted-foreground">
-                      {source.content}
-                    </p>
-                    <p className="mt-2 line-clamp-1 text-xs text-muted-foreground">
-                      {new URL(source.url).hostname}
-                    </p>
-                  </a>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Recap Content */}
-        {(recapContent || isLoading) && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <BookOpen className="h-5 w-5" />
-                {bookTitle}
-                {seriesName && (
-                  <Badge variant="secondary" className="ml-2">
-                    {seriesName}
-                  </Badge>
-                )}
-              </CardTitle>
-              {author && (
-                <CardDescription>by {author}</CardDescription>
-              )}
-            </CardHeader>
-            <CardContent>
-              <div
-                className={`prose-recap whitespace-pre-wrap ${isLoading ? 'streaming-cursor' : ''}`}
-              >
-                {recapContent || (
-                  <div className="flex items-center gap-2 text-muted-foreground">
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    Searching for information and generating recap...
-                  </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Quick Start Suggestions */}
-        {!recapContent && !isLoading && (
-          <div className="mt-12">
-            <h2 className="mb-4 text-center text-lg font-semibold text-muted-foreground">
-              Popular Series to Recap
-            </h2>
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {[
-                { title: 'A Game of Thrones', series: 'A Song of Ice and Fire', author: 'George R.R. Martin' },
-                { title: 'The Way of Kings', series: 'The Stormlight Archive', author: 'Brandon Sanderson' },
-                { title: 'The Name of the Wind', series: 'The Kingkiller Chronicle', author: 'Patrick Rothfuss' },
-                { title: 'The Eye of the World', series: 'The Wheel of Time', author: 'Robert Jordan' },
-                { title: 'Mistborn: The Final Empire', series: 'Mistborn', author: 'Brandon Sanderson' },
-                { title: 'The Lies of Locke Lamora', series: 'Gentleman Bastard', author: 'Scott Lynch' },
-              ].map((book) => (
-                <button
-                  key={book.title}
-                  onClick={() => {
-                    setBookTitle(book.title)
-                    setSeriesName(book.series)
-                    setAuthor(book.author)
-                  }}
-                  className="rounded-lg border bg-card p-4 text-left transition-colors hover:bg-accent"
-                >
-                  <p className="font-medium">{book.title}</p>
-                  <p className="text-sm text-muted-foreground">{book.series}</p>
-                  <p className="text-xs text-muted-foreground">by {book.author}</p>
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
       </div>
     </div>
   )
