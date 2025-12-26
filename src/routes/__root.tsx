@@ -33,10 +33,11 @@ export const Route = createRootRoute({
 })
 
 function RootDocument() {
-  const [isHomePage, setIsHomePage] = React.useState(false)
+  const [isChatPage, setIsChatPage] = React.useState(false)
 
   React.useEffect(() => {
-    setIsHomePage(window.location.pathname === '/')
+    const pathname = window.location.pathname
+    setIsChatPage(pathname === '/' || pathname.startsWith('/chat/'))
   }, [])
 
   return (
@@ -80,7 +81,7 @@ function RootDocument() {
           <main className="flex-1">
             <Outlet />
           </main>
-          {!isHomePage && (
+          {!isChatPage && (
             <footer className="border-t py-6 text-center text-sm text-muted-foreground">
               <p>The Book Oracle - Where ancient wisdom meets the tales of your favorite series</p>
             </footer>
