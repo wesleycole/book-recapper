@@ -44,8 +44,8 @@
   --radius-md: calc(0.5rem - 2px);
   --radius-sm: calc(0.5rem - 4px);
 
-  /* Book reading font families */
-  --font-serif: 'Charter', 'Bitstream Charter', 'Georgia', 'Iowan Old Style', 'Palatino Linotype', 'URW Palladio L', 'P052', serif;
+  /* Book reading font families - Bookerly-inspired serif stack */
+  --font-serif: 'Bookerly', 'Iowan Old Style', 'Palatino Linotype', 'Palatino', 'Book Antiqua', 'Georgia', 'Garamond', 'Times New Roman', serif;
   --font-sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
@@ -115,45 +115,114 @@
   @apply bg-muted-foreground/50;
 }
 
-/* Markdown content styling */
+/* Markdown content styling - Library-inspired book reading experience */
+.prose-recap {
+  font-family: var(--font-serif);
+  font-size: 16px;
+  line-height: 1.8;
+  color: hsl(var(--color-foreground));
+  max-width: 65ch; /* Optimal reading width */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  font-feature-settings: "kern" 1, "liga" 1;
+}
+
 .prose-recap h1 {
-  @apply text-2xl font-bold mt-6 mb-4 text-foreground;
+  font-family: var(--font-serif);
+  @apply text-3xl font-bold mt-8 mb-5 text-foreground;
+  letter-spacing: -0.025em;
+  line-height: 1.2;
 }
 
 .prose-recap h2 {
-  @apply text-xl font-semibold mt-5 mb-3 text-foreground;
+  font-family: var(--font-serif);
+  @apply text-2xl font-semibold mt-7 mb-4 text-foreground;
+  letter-spacing: -0.02em;
+  line-height: 1.3;
 }
 
 .prose-recap h3 {
-  @apply text-lg font-medium mt-4 mb-2 text-foreground;
+  font-family: var(--font-serif);
+  @apply text-xl font-medium mt-6 mb-3 text-foreground;
+  letter-spacing: -0.015em;
+  line-height: 1.4;
 }
 
 .prose-recap p {
-  @apply my-3 leading-relaxed;
+  @apply my-4;
+  line-height: 1.8;
+  text-align: justify;
+  hyphens: auto;
+  word-spacing: 0.05em;
+}
+
+.prose-recap p:first-of-type {
+  margin-top: 0;
 }
 
 .prose-recap ul {
-  @apply list-disc pl-6 my-3 space-y-1;
+  @apply list-disc pl-8 my-4 space-y-2;
 }
 
 .prose-recap ol {
-  @apply list-decimal pl-6 my-3 space-y-1;
+  @apply list-decimal pl-8 my-4 space-y-2;
 }
 
 .prose-recap li {
-  @apply leading-relaxed;
+  line-height: 1.75;
+  margin-bottom: 0.5em;
+}
+
+.prose-recap li p {
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
 }
 
 .prose-recap strong {
   @apply font-semibold text-foreground;
+  font-weight: 600;
 }
 
 .prose-recap em {
   @apply italic;
+  font-style: italic;
 }
 
 .prose-recap blockquote {
-  @apply border-l-4 border-primary/50 pl-4 italic my-4 text-muted-foreground;
+  @apply border-l-4 border-primary/40 pl-6 pr-4 italic my-6 text-muted-foreground;
+  line-height: 1.75;
+  font-size: 1.05em;
+}
+
+.prose-recap code {
+  font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Fira Code', 'Droid Sans Mono', 'Source Code Pro', monospace;
+  @apply bg-muted px-1.5 py-0.5 rounded text-sm;
+  font-size: 0.9em;
+}
+
+.prose-recap pre {
+  @apply bg-muted p-4 rounded-lg my-4 overflow-x-auto;
+  font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Fira Code', 'Droid Sans Mono', 'Source Code Pro', monospace;
+}
+
+.prose-recap pre code {
+  @apply bg-transparent p-0;
+  font-size: 0.875rem;
+}
+
+.prose-recap hr {
+  @apply my-8 border-t border-border;
+  opacity: 0.6;
+}
+
+.prose-recap a {
+  @apply text-primary underline decoration-1 underline-offset-2;
+  transition: color 0.2s ease;
+}
+
+.prose-recap a:hover {
+  @apply text-primary/80;
 }
 
 /* Streaming text animation */
