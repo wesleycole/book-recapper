@@ -186,28 +186,28 @@ function HomePage() {
     <div className="flex flex-col">
       {/* Hero section - full viewport height with dark teal background */}
       <div
-        className="relative flex h-[calc(100vh-4rem)] flex-col items-center px-4 justify-center"
+        className="relative flex h-[calc(100vh-4rem)] flex-col items-center px-4 justify-end pb-6 md:justify-center md:pb-0"
         style={{
           background: 'linear-gradient(135deg, #2d4547 0%, #3d5557 50%, #4a6365 100%)',
         }}
       >
-        {/* Orb image - positioned in bottom right */}
+        {/* Orb image - centered on mobile, bottom-right on desktop */}
         <div
-          className="pointer-events-none absolute bottom-0 z-0 -right-4 md:right-0"
+          className="pointer-events-none absolute z-0 left-1/2 -translate-x-1/2 top-4 md:translate-x-0 md:left-auto md:bottom-0 md:top-auto md:right-0"
           style={{
-            width: 'min(70vw, 800px)',
-            height: 'min(55vh, 900px)',
+            width: 'min(80vw, 800px)',
+            height: 'min(45vh, 900px)',
           }}
         >
           <img
             src="/orb_no_bg.png"
             alt=""
-            className="h-full w-full object-contain object-right-bottom"
+            className="h-full w-full object-contain md:object-right-bottom"
           />
         </div>
 
         {/* Content */}
-        <div className="relative z-10 w-full max-w-4xl space-y-6 md:space-y-12">
+        <div className="relative z-10 w-full max-w-4xl space-y-4 md:space-y-12">
           {/* Hero text */}
           <div className="text-center">
             <h1 className="font-display text-3xl font-light tracking-tight text-gold sm:text-4xl md:text-6xl">
