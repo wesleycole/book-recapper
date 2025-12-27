@@ -186,17 +186,17 @@ function HomePage() {
     <div className="flex flex-col">
       {/* Hero section - full viewport height with dark teal background */}
       <div
-        className="relative flex h-[calc(100vh-4rem)] flex-col items-center justify-center px-4"
+        className="relative flex h-[calc(100vh-4rem)] flex-col items-center justify-center px-4 md:justify-center justify-end pb-8 md:pb-0"
         style={{
           background: 'linear-gradient(135deg, #2d4547 0%, #3d5557 50%, #4a6365 100%)',
         }}
       >
         {/* Orb image - positioned in bottom right */}
         <div
-          className="pointer-events-none absolute bottom-0 right-0 z-0"
+          className="pointer-events-none absolute bottom-0 right-0 z-0 md:right-0 -right-8"
           style={{
-            width: 'min(70vw, 800px)',
-            height: 'min(80vh, 900px)',
+            width: 'min(85vw, 800px)',
+            height: 'min(85vh, 900px)',
           }}
         >
           <img
@@ -207,13 +207,13 @@ function HomePage() {
         </div>
 
         {/* Content */}
-        <div className="relative z-10 w-full max-w-4xl space-y-12">
+        <div className="relative z-10 w-full max-w-4xl space-y-8 md:space-y-12">
           {/* Hero text */}
           <div className="text-center">
-            <h1 className="font-display text-4xl font-light tracking-tight text-gold sm:text-5xl md:text-6xl">
+            <h1 className="font-display text-3xl font-light tracking-tight text-gold sm:text-4xl md:text-6xl">
               Rediscover <span className="italic">Your</span> Books
             </h1>
-            <p className="mt-4 text-lg text-white/80">
+            <p className="mt-3 text-base md:text-lg text-white/80 md:mt-4">
               Get AI-powered recaps to refresh your memory before the next chapter
             </p>
           </div>
