@@ -7,7 +7,7 @@ import {
   createRootRoute,
 } from '@tanstack/react-router'
 import * as React from 'react'
-import { BookOpen, Library, MessageSquare, FileText, Eye } from 'lucide-react'
+import { BookOpen, Library, BookMarked, MessageSquare, FileText, Eye } from 'lucide-react'
 import { SignInButton, SignUpButton, UserButton } from '@clerk/clerk-react'
 import { Authenticated, Unauthenticated, AuthLoading } from 'convex/react'
 import { ConvexClientProvider } from '~/components/ConvexClientProvider'
@@ -76,6 +76,15 @@ function RootDocument() {
                   <Library className="h-4 w-4" />
                   <span className="hidden sm:inline">Browse</span>
                 </Link>
+                <Authenticated>
+                  <Link
+                    to="/library"
+                    className="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white/70 transition-colors hover:bg-white/10 hover:text-white [&.active]:bg-white/10 [&.active]:text-white"
+                  >
+                    <BookMarked className="h-4 w-4" />
+                    <span className="hidden sm:inline">My Library</span>
+                  </Link>
+                </Authenticated>
                 <div className="ml-2 flex items-center gap-2">
                   <AuthLoading>
                     <div className="h-8 w-8 animate-pulse rounded-full bg-white/10" />

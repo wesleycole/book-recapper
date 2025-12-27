@@ -1,6 +1,7 @@
 import { BookOpen, User, Calendar } from 'lucide-react'
 import { cn } from '~/lib/utils'
 import { WavyLinesBackground } from '~/components/ui/wavy-lines'
+import { AddToLibraryButton } from '~/components/AddToLibraryButton'
 import type { BookDetails } from '~/lib/openlib'
 
 interface BookCardProps {
@@ -74,60 +75,72 @@ export function BookCard({ book, onClick, variant = 'default', className }: Book
   // Carousel variant - large cards with meta at bottom
   if (isCarousel) {
     return (
-      <button
-        onClick={onClick}
+      <div
         className={cn(
           'group relative flex h-[480px] w-[320px] flex-shrink-0 flex-col overflow-hidden rounded-md border border-gray-200 bg-gray-100 text-left transition-all duration-300',
           'hover:border-primary/30 hover:shadow-lg',
           className
         )}
       >
-        {/* Wavy lines background - covers entire card */}
-        <div className="absolute inset-0">
-          <WavyLinesBackground className="opacity-40 transition-opacity group-hover:opacity-60" />
+        {/* Add to Library button - top right corner */}
+        <div className="absolute right-3 top-3 z-20">
+          <AddToLibraryButton
+            bookId={book.key}
+            title={book.title}
+            author={book.authors[0]}
+            coverUrl={book.coverUrl}
+            variant="icon"
+          />
         </div>
 
-        {/* Content container */}
-        <div className="relative z-10 flex flex-1 flex-col">
-          {/* Book cover - centered at top */}
-          <div className="flex flex-1 items-center justify-center px-6 pt-8 pb-4">
-            <div className="aspect-[2/3] w-40 flex-shrink-0 overflow-hidden rounded-md border border-border/50 bg-card shadow-lg transition-transform duration-300 group-hover:scale-105 group-hover:shadow-xl">
-              {book.coverUrl ? (
-                <img
-                  src={book.coverUrl}
-                  alt={book.title}
-                  className="h-full w-full object-contain"
-                  loading="lazy"
-                />
-              ) : (
-                <div className="flex h-full w-full items-center justify-center bg-muted">
-                  <BookOpen className="h-16 w-16 text-muted-foreground" />
-                </div>
+        {/* Clickable area */}
+        <button onClick={onClick} className="flex flex-1 flex-col">
+          {/* Wavy lines background - covers entire card */}
+          <div className="absolute inset-0">
+            <WavyLinesBackground className="opacity-40 transition-opacity group-hover:opacity-60" />
+          </div>
+
+          {/* Content container */}
+          <div className="relative z-10 flex flex-1 flex-col">
+            {/* Book cover - centered at top */}
+            <div className="flex flex-1 items-center justify-center px-6 pt-8 pb-4">
+              <div className="aspect-[2/3] w-40 flex-shrink-0 overflow-hidden rounded-md border border-border/50 bg-card shadow-lg transition-transform duration-300 group-hover:scale-105 group-hover:shadow-xl">
+                {book.coverUrl ? (
+                  <img
+                    src={book.coverUrl}
+                    alt={book.title}
+                    className="h-full w-full object-contain"
+                    loading="lazy"
+                  />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center bg-muted">
+                    <BookOpen className="h-16 w-16 text-muted-foreground" />
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Title and author - middle section */}
+            <div className="px-6 pb-3 text-center">
+              <h3 className="font-serif text-xl font-semibold leading-tight text-gray-800 line-clamp-2">
+                {book.title}
+              </h3>
+              {book.authors.length > 0 && (
+                <p className="mt-2 flex items-center justify-center gap-1 text-sm text-gray-500">
+                  <User className="h-3 w-3" />
+                  <span className="line-clamp-1">{book.authors.join(', ')}</span>
+                </p>
+              )}
+              {book.publishYear && (
+                <p className="mt-1 flex items-center justify-center gap-1 text-sm text-gray-500">
+                  <Calendar className="h-3 w-3" />
+                  {book.publishYear}
+                </p>
               )}
             </div>
           </div>
-
-          {/* Title and author - middle section */}
-          <div className="px-6 pb-3 text-center">
-            <h3 className="font-serif text-xl font-semibold leading-tight text-gray-800 line-clamp-2">
-              {book.title}
-            </h3>
-            {book.authors.length > 0 && (
-              <p className="mt-2 flex items-center justify-center gap-1 text-sm text-gray-500">
-                <User className="h-3 w-3" />
-                <span className="line-clamp-1">{book.authors.join(', ')}</span>
-              </p>
-            )}
-            {book.publishYear && (
-              <p className="mt-1 flex items-center justify-center gap-1 text-sm text-gray-500">
-                <Calendar className="h-3 w-3" />
-                {book.publishYear}
-              </p>
-            )}
-          </div>
-
-        </div>
-      </button>
+        </button>
+      </div>
     )
   }
 
