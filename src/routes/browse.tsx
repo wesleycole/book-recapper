@@ -67,13 +67,14 @@ function BrowsePage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="min-h-[calc(100vh-4rem)] bg-content-bg">
+      <div className="container mx-auto px-4 py-8">
       {/* Header */}
       <div className="mb-8 text-center">
-        <h1 className="font-serif text-4xl font-light tracking-tight text-foreground">
+        <h1 className="font-display text-4xl font-light tracking-tight text-gold-dark sm:text-5xl">
           Browse the <span className="italic">Library</span>
         </h1>
-        <p className="mt-3 text-muted-foreground">
+        <p className="mt-3 text-content-fg/70">
           Search for books using the Open Library database
         </p>
       </div>
@@ -91,10 +92,10 @@ function BrowsePage() {
 
       {/* Loading State */}
       {isLoading && (
-        <div className="mx-auto max-w-6xl">
-          <div className="grid gap-4 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
-            {Array.from({ length: 10 }).map((_, i) => (
-              <BookCardSkeleton key={i} variant="grid" />
+        <div className="mx-auto max-w-[1400px]">
+          <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 justify-items-center">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <BookCardSkeleton key={i} variant="carousel" />
             ))}
           </div>
         </div>
@@ -102,29 +103,29 @@ function BrowsePage() {
 
       {/* Results */}
       {!isLoading && results.length > 0 && (
-        <div className="mx-auto max-w-6xl">
+        <div className="mx-auto max-w-[1400px]">
           <div className="mb-6 flex items-center gap-4">
-            <div className="h-px flex-1 bg-border" />
+            <div className="h-px flex-1 bg-gold-dark/20" />
             <div className="flex items-center gap-2">
               {lastSearchMode === 'ai' && (
-                <Sparkles className="h-4 w-4 text-purple-500" />
+                <Sparkles className="h-4 w-4 text-purple-600" />
               )}
-              <span className="text-sm font-medium text-muted-foreground">
+              <span className="text-sm font-medium text-content-fg/60">
                 {results.length} results found
                 {lastSearchMode === 'ai' && aiExplanation && (
-                  <span className="ml-2 text-purple-500">• {aiExplanation}</span>
+                  <span className="ml-2 text-purple-600">• {aiExplanation}</span>
                 )}
               </span>
             </div>
-            <div className="h-px flex-1 bg-border" />
+            <div className="h-px flex-1 bg-gold-dark/20" />
           </div>
-          <div className="grid gap-4 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+          <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 justify-items-center">
             {results.map((book) => (
               <BookCard
                 key={book.key}
                 book={book}
                 onClick={() => handleSelectBook(book)}
-                variant="grid"
+                variant="carousel"
               />
             ))}
           </div>
@@ -134,14 +135,14 @@ function BrowsePage() {
       {/* No Results */}
       {!isLoading && hasSearched && results.length === 0 && (
         <div className="mx-auto max-w-md text-center">
-          <div className="relative mx-auto mb-6 h-24 w-24 overflow-hidden rounded-2xl border border-border bg-card">
+          <div className="relative mx-auto mb-6 h-24 w-24 overflow-hidden rounded-2xl border border-gold-dark/20 bg-white">
             <WavyLinesBackground className="opacity-50" />
             <div className="relative flex h-full w-full items-center justify-center">
-              <Search className="h-10 w-10 text-muted-foreground" />
+              <Search className="h-10 w-10 text-content-fg/40" />
             </div>
           </div>
-          <h2 className="mb-2 font-serif text-2xl font-light">No results found</h2>
-          <p className="text-muted-foreground">
+          <h2 className="mb-2 font-serif text-2xl font-light text-content-fg">No results found</h2>
+          <p className="text-content-fg/60">
             {lastSearchMode === 'ai'
               ? "Try describing your book differently or use a simpler search term."
               : "Try adjusting your search terms or type more to enable AI-powered search."}
@@ -152,11 +153,11 @@ function BrowsePage() {
       {/* Initial State */}
       {!isLoading && !hasSearched && (
         <div className="mx-auto max-w-3xl">
-          <Card className="relative overflow-hidden">
-            <WavyLinesBackground className="opacity-40" />
+          <Card className="relative overflow-hidden border-gold-dark/20 bg-white">
+            <WavyLinesBackground className="opacity-20" />
             <CardHeader className="relative">
-              <CardTitle className="font-serif text-2xl font-light">Discover Your Next Read</CardTitle>
-              <CardDescription className="text-base">
+              <CardTitle className="font-serif text-2xl font-light text-content-fg">Discover Your Next Read</CardTitle>
+              <CardDescription className="text-base text-content-fg/60">
                 Type a book title for quick search, or describe what you're looking for
                 to enable AI-powered search with the rainbow border effect.
               </CardDescription>
@@ -165,7 +166,7 @@ function BrowsePage() {
               <div className="space-y-6">
                 {/* Quick Searches */}
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground mb-3">
+                  <p className="text-sm font-medium text-content-fg/60 mb-3">
                     Quick searches:
                   </p>
                   <div className="flex flex-wrap gap-2">
@@ -181,7 +182,7 @@ function BrowsePage() {
                         key={term}
                         variant="secondary"
                         size="sm"
-                        className="rounded-lg"
+                        className="rounded-lg bg-content-bg text-content-fg hover:bg-gold-dark/10"
                         onClick={() => handleQuickSearch(term)}
                       >
                         {term}
@@ -192,7 +193,7 @@ function BrowsePage() {
 
                 {/* AI Search Examples */}
                 <div>
-                  <p className="text-sm font-medium text-purple-600 dark:text-purple-400 mb-3 flex items-center gap-2">
+                  <p className="text-sm font-medium text-purple-600 mb-3 flex items-center gap-2">
                     <Sparkles className="h-4 w-4" />
                     Try AI-powered searches:
                   </p>
@@ -207,7 +208,7 @@ function BrowsePage() {
                         key={term}
                         variant="outline"
                         size="sm"
-                        className="rounded-lg border-purple-200 dark:border-purple-800 text-purple-700 dark:text-purple-300 hover:bg-purple-50 dark:hover:bg-purple-950"
+                        className="rounded-lg border-purple-300 text-purple-700 hover:bg-purple-50"
                         onClick={() => handleQuickSearch(term)}
                       >
                         {term}
@@ -220,6 +221,7 @@ function BrowsePage() {
           </Card>
         </div>
       )}
+      </div>
     </div>
   )
 }

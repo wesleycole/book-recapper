@@ -220,13 +220,13 @@ function ChatPage() {
   }
 
   return (
-    <div className="chat-container flex h-[calc(100vh-3.5rem)] flex-col">
+    <div className="chat-container flex h-[calc(100vh-3.5rem)] flex-col bg-content-bg">
       {/* Messages Area */}
       <div className="flex-1 overflow-y-auto pb-4">
         <div className="mx-auto max-w-2xl px-4 py-4">
           {messages.length === 0 ? (
             <div className="flex min-h-[60vh] flex-col items-center justify-center px-4">
-              <p className="mb-8 text-center text-lg text-muted-foreground">
+              <p className="mb-8 text-center text-lg text-content-fg/60">
                 What book would you like to recap?
               </p>
               <div className="flex flex-wrap justify-center gap-2">
@@ -239,7 +239,7 @@ function ChatPage() {
                   <button
                     key={suggestion}
                     onClick={() => handleSuggestionClick(suggestion)}
-                    className="suggestion-chip rounded-full border border-border bg-card px-4 py-2 text-sm transition-all hover:border-primary hover:bg-accent active:scale-95"
+                    className="suggestion-chip rounded-full border border-gold-dark/30 bg-white px-4 py-2 text-sm text-content-fg transition-all hover:border-gold-dark hover:bg-gold-dark/5 active:scale-95"
                   >
                     {suggestion}
                   </button>
@@ -287,7 +287,7 @@ function ChatPage() {
                             <div className="sources-section">
                               <button
                                 onClick={() => toggleSources(message.id)}
-                                className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
+                                className="flex items-center gap-1.5 text-xs text-content-fg/50 hover:text-content-fg transition-colors"
                               >
                                 {message.showSources ? (
                                   <ChevronUp className="h-3.5 w-3.5" />
@@ -304,7 +304,7 @@ function ChatPage() {
                                       href={source.url}
                                       target="_blank"
                                       rel="noopener noreferrer"
-                                      className="source-chip inline-flex items-center gap-1.5 rounded-full bg-muted px-3 py-1.5 text-xs text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
+                                      className="source-chip inline-flex items-center gap-1.5 rounded-full bg-white border border-gold-dark/20 px-3 py-1.5 text-xs text-content-fg/60 hover:bg-gold-dark/5 hover:text-content-fg transition-colors"
                                     >
                                       <span className="max-w-[150px] truncate">
                                         {new URL(source.url).hostname.replace('www.', '')}
@@ -328,7 +328,7 @@ function ChatPage() {
       </div>
 
       {/* Input Area */}
-      <div className="chat-input-area sticky bottom-0 border-t bg-background/95 backdrop-blur-sm px-4 py-3">
+      <div className="chat-input-area sticky bottom-0 border-t border-gold-dark/20 bg-content-bg/95 backdrop-blur-sm px-4 py-3">
         <div className="mx-auto max-w-2xl">
           <form onSubmit={handleSubmit} className="flex items-center gap-2">
             <div className="relative flex-1">
@@ -340,7 +340,7 @@ function ChatPage() {
                 onKeyDown={handleKeyDown}
                 placeholder="Ask about a book..."
                 disabled={isLoading}
-                className="chat-input w-full rounded-full border border-border bg-card px-4 py-3 pr-12 text-[15px] placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 disabled:opacity-50"
+                className="chat-input w-full rounded-full border border-gold-dark/30 bg-white px-4 py-3 pr-12 text-[15px] text-content-fg placeholder:text-content-fg/40 focus:border-gold-dark focus:outline-none focus:ring-2 focus:ring-gold-dark/20 disabled:opacity-50"
               />
             </div>
             <Button
