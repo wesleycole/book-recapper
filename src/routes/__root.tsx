@@ -8,6 +8,9 @@ import {
 } from '@tanstack/react-router'
 import * as React from 'react'
 import { BookOpen, Library, MessageSquare, FileText, Eye } from 'lucide-react'
+import { SignInButton, SignUpButton, UserButton } from '@clerk/clerk-react'
+import { Authenticated, Unauthenticated, AuthLoading } from 'convex/react'
+import { ConvexClientProvider } from '~/components/ConvexClientProvider'
 import appCss from '~/styles/app.css?url'
 
 export const Route = createRootRoute({
@@ -46,6 +49,7 @@ function RootDocument() {
         <HeadContent />
       </head>
       <body className="min-h-screen bg-background font-sans antialiased">
+        <ConvexClientProvider>
         <div className="flex min-h-screen flex-col">
           <header className="sticky top-0 z-50 w-full border-b border-white/10 bg-background/80 backdrop-blur-md">
             <div className="container mx-auto flex h-16 items-center px-4">
@@ -72,6 +76,32 @@ function RootDocument() {
                   <Library className="h-4 w-4" />
                   <span className="hidden sm:inline">Browse</span>
                 </Link>
+                <div className="ml-2 flex items-center gap-2">
+                  <AuthLoading>
+                    <div className="h-8 w-8 animate-pulse rounded-full bg-white/10" />
+                  </AuthLoading>
+                  <Unauthenticated>
+                    <SignInButton mode="modal">
+                      <button className="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white/70 transition-colors hover:bg-white/10 hover:text-white">
+                        Sign In
+                      </button>
+                    </SignInButton>
+                    <SignUpButton mode="modal">
+                      <button className="inline-flex items-center gap-2 rounded-lg bg-primary/20 px-4 py-2 text-sm font-medium text-primary transition-colors hover:bg-primary/30">
+                        Sign Up
+                      </button>
+                    </SignUpButton>
+                  </Unauthenticated>
+                  <Authenticated>
+                    <UserButton
+                      appearance={{
+                        elements: {
+                          avatarBox: "h-8 w-8"
+                        }
+                      }}
+                    />
+                  </Authenticated>
+                </div>
               </nav>
             </div>
           </header>
@@ -104,6 +134,7 @@ function RootDocument() {
             </footer>
           )}
         </div>
+        </ConvexClientProvider>
         <Scripts />
       </body>
     </html>
