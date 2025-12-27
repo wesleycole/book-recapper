@@ -186,17 +186,17 @@ function HomePage() {
     <div className="flex flex-col">
       {/* Hero section - full viewport height with dark teal background */}
       <div
-        className="relative flex h-[calc(100vh-4rem)] flex-col items-center justify-center px-4 md:justify-center justify-end pb-8 md:pb-0"
+        className="relative flex h-[calc(100vh-4rem)] flex-col items-center px-4 justify-center"
         style={{
           background: 'linear-gradient(135deg, #2d4547 0%, #3d5557 50%, #4a6365 100%)',
         }}
       >
         {/* Orb image - positioned in bottom right */}
         <div
-          className="pointer-events-none absolute bottom-0 right-0 z-0 md:right-0 -right-8"
+          className="pointer-events-none absolute bottom-0 z-0 -right-4 md:right-0"
           style={{
-            width: 'min(85vw, 800px)',
-            height: 'min(85vh, 900px)',
+            width: 'min(70vw, 800px)',
+            height: 'min(55vh, 900px)',
           }}
         >
           <img
@@ -207,7 +207,7 @@ function HomePage() {
         </div>
 
         {/* Content */}
-        <div className="relative z-10 w-full max-w-4xl space-y-8 md:space-y-12">
+        <div className="relative z-10 w-full max-w-4xl space-y-6 md:space-y-12">
           {/* Hero text */}
           <div className="text-center">
             <h1 className="font-display text-3xl font-light tracking-tight text-gold sm:text-4xl md:text-6xl">
