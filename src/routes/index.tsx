@@ -255,13 +255,13 @@ function HomePage() {
       </div>
 
       {/* Popular Reads section - below the fold */}
-      <div className="bg-background px-4 py-16">
+      <div className="bg-content-bg px-4 py-16">
         <div className="mx-auto w-full max-w-4xl">
           {/* Section header with arrows */}
           <div className="flex items-center justify-between mb-8">
             <div className="flex items-center gap-4">
-              <div className="h-px w-8 bg-border" />
-              <span className="text-sm font-medium text-gold">Popular Reads</span>
+              <div className="h-px w-8 bg-gold-dark/30" />
+              <span className="text-sm font-medium text-gold-dark">Popular Reads</span>
             </div>
             <div className="flex items-center gap-2">
               <Button
@@ -269,7 +269,7 @@ function HomePage() {
                 size="icon"
                 onClick={() => scrollCarousel('left')}
                 disabled={!canScrollLeft}
-                className="h-10 w-10 rounded-full border-border text-white hover:bg-secondary hover:text-primary"
+                className="h-10 w-10 rounded-full border-gold-dark/30 text-content-fg hover:bg-gold-dark/10 hover:text-gold-dark"
               >
                 <ChevronLeft className="h-5 w-5" />
               </Button>
@@ -278,7 +278,7 @@ function HomePage() {
                 size="icon"
                 onClick={() => scrollCarousel('right')}
                 disabled={!canScrollRight && !isLoadingMore}
-                className="h-10 w-10 rounded-full border-border text-white hover:bg-secondary hover:text-primary"
+                className="h-10 w-10 rounded-full border-gold-dark/30 text-content-fg hover:bg-gold-dark/10 hover:text-gold-dark"
               >
                 <ChevronRight className="h-5 w-5" />
               </Button>
