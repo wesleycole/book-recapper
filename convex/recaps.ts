@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
+import { getAuthUserId } from "@convex-dev/auth/server";
 
 export const save = mutation({
   args: {
@@ -13,26 +14,16 @@ export const save = mutation({
     }))),
   },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) {
       throw new Error("Not authenticated");
-    }
-
-    // Get the user
-    const user = await ctx.db
-      .query("users")
-      .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
-      .unique();
-
-    if (!user) {
-      throw new Error("User not found");
     }
 
     // Check if recap for this book already exists
     const existingRecap = await ctx.db
       .query("recaps")
       .withIndex("by_user_and_book", (q) =>
-        q.eq("userId", user._id).eq("bookTitle", args.bookTitle)
+        q.eq("userId", userId).eq("bookTitle", args.bookTitle)
       )
       .unique();
 
@@ -49,7 +40,7 @@ export const save = mutation({
 
     // Create new recap
     const recapId = await ctx.db.insert("recaps", {
-      userId: user._id,
+      userId,
       bookTitle: args.bookTitle,
       bookAuthor: args.bookAuthor,
       bookCover: args.bookCover,
@@ -65,23 +56,14 @@ export const save = mutation({
 export const listForUser = query({
   args: {},
   handler: async (ctx) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {
-      return [];
-    }
-
-    const user = await ctx.db
-      .query("users")
-      .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
-      .unique();
-
-    if (!user) {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) {
       return [];
     }
 
     const recaps = await ctx.db
       .query("recaps")
-      .withIndex("by_user", (q) => q.eq("userId", user._id))
+      .withIndex("by_user", (q) => q.eq("userId", userId))
       .order("desc")
       .collect();
 
@@ -92,24 +74,15 @@ export const listForUser = query({
 export const get = query({
   args: { bookTitle: v.string() },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {
-      return null;
-    }
-
-    const user = await ctx.db
-      .query("users")
-      .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
-      .unique();
-
-    if (!user) {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) {
       return null;
     }
 
     const recap = await ctx.db
       .query("recaps")
       .withIndex("by_user_and_book", (q) =>
-        q.eq("userId", user._id).eq("bookTitle", args.bookTitle)
+        q.eq("userId", userId).eq("bookTitle", args.bookTitle)
       )
       .unique();
 
@@ -120,22 +93,13 @@ export const get = query({
 export const remove = mutation({
   args: { id: v.id("recaps") },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) {
       throw new Error("Not authenticated");
     }
 
-    const user = await ctx.db
-      .query("users")
-      .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
-      .unique();
-
-    if (!user) {
-      throw new Error("User not found");
-    }
-
     const recap = await ctx.db.get(args.id);
-    if (!recap || recap.userId !== user._id) {
+    if (!recap || recap.userId !== userId) {
       throw new Error("Recap not found or not authorized");
     }
 

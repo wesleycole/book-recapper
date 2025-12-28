@@ -8,9 +8,9 @@ import {
 } from '@tanstack/react-router'
 import * as React from 'react'
 import { BookOpen, Library, BookMarked, MessageSquare, FileText, Eye } from 'lucide-react'
-import { SignInButton, SignUpButton, UserButton } from '@clerk/clerk-react'
-import { Authenticated, Unauthenticated, AuthLoading } from 'convex/react'
+import { Authenticated } from 'convex/react'
 import { ConvexClientProvider } from '~/components/ConvexClientProvider'
+import { AuthButton } from '~/components/AuthButton'
 import appCss from '~/styles/app.css?url'
 
 export const Route = createRootRoute({
@@ -85,31 +85,8 @@ function RootDocument() {
                     <span className="hidden sm:inline">My Library</span>
                   </Link>
                 </Authenticated>
-                <div className="ml-2 flex items-center gap-2">
-                  <AuthLoading>
-                    <div className="h-8 w-8 animate-pulse rounded-full bg-white/10" />
-                  </AuthLoading>
-                  <Unauthenticated>
-                    <SignInButton mode="modal">
-                      <button className="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white/70 transition-colors hover:bg-white/10 hover:text-white">
-                        Sign In
-                      </button>
-                    </SignInButton>
-                    <SignUpButton mode="modal">
-                      <button className="inline-flex items-center gap-2 rounded-lg bg-primary/20 px-4 py-2 text-sm font-medium text-primary transition-colors hover:bg-primary/30">
-                        Sign Up
-                      </button>
-                    </SignUpButton>
-                  </Unauthenticated>
-                  <Authenticated>
-                    <UserButton
-                      appearance={{
-                        elements: {
-                          avatarBox: "h-8 w-8"
-                        }
-                      }}
-                    />
-                  </Authenticated>
+                <div className="ml-2">
+                  <AuthButton />
                 </div>
               </nav>
             </div>

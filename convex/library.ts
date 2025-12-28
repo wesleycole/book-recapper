@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
+import { getAuthUserId } from "@convex-dev/auth/server";
 
 const bookStatus = v.union(
   v.literal("want_to_read"),
@@ -16,25 +17,16 @@ export const addBook = mutation({
     status: bookStatus,
   },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) {
       throw new Error("Not authenticated");
-    }
-
-    const user = await ctx.db
-      .query("users")
-      .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
-      .unique();
-
-    if (!user) {
-      throw new Error("User not found");
     }
 
     // Check if book already exists in library
     const existingBook = await ctx.db
       .query("library")
       .withIndex("by_user_and_book", (q) =>
-        q.eq("userId", user._id).eq("bookId", args.bookId)
+        q.eq("userId", userId).eq("bookId", args.bookId)
       )
       .unique();
 
@@ -44,7 +36,7 @@ export const addBook = mutation({
 
     const now = Date.now();
     const bookData: {
-      userId: typeof user._id;
+      userId: typeof userId;
       bookId: string;
       title: string;
       author?: string;
@@ -55,7 +47,7 @@ export const addBook = mutation({
       createdAt: number;
       updatedAt: number;
     } = {
-      userId: user._id,
+      userId,
       bookId: args.bookId,
       title: args.title,
       author: args.author,
@@ -82,22 +74,13 @@ export const updateStatus = mutation({
     status: bookStatus,
   },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) {
       throw new Error("Not authenticated");
     }
 
-    const user = await ctx.db
-      .query("users")
-      .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
-      .unique();
-
-    if (!user) {
-      throw new Error("User not found");
-    }
-
     const book = await ctx.db.get(args.id);
-    if (!book || book.userId !== user._id) {
+    if (!book || book.userId !== userId) {
       throw new Error("Book not found or not authorized");
     }
 
@@ -131,8 +114,8 @@ export const updateRating = mutation({
     rating: v.number(),
   },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) {
       throw new Error("Not authenticated");
     }
 
@@ -140,17 +123,8 @@ export const updateRating = mutation({
       throw new Error("Rating must be between 1 and 5");
     }
 
-    const user = await ctx.db
-      .query("users")
-      .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
-      .unique();
-
-    if (!user) {
-      throw new Error("User not found");
-    }
-
     const book = await ctx.db.get(args.id);
-    if (!book || book.userId !== user._id) {
+    if (!book || book.userId !== userId) {
       throw new Error("Book not found or not authorized");
     }
 
@@ -167,22 +141,13 @@ export const updateNotes = mutation({
     notes: v.string(),
   },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) {
       throw new Error("Not authenticated");
     }
 
-    const user = await ctx.db
-      .query("users")
-      .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
-      .unique();
-
-    if (!user) {
-      throw new Error("User not found");
-    }
-
     const book = await ctx.db.get(args.id);
-    if (!book || book.userId !== user._id) {
+    if (!book || book.userId !== userId) {
       throw new Error("Book not found or not authorized");
     }
 
@@ -198,22 +163,13 @@ export const removeBook = mutation({
     id: v.id("library"),
   },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) {
       throw new Error("Not authenticated");
     }
 
-    const user = await ctx.db
-      .query("users")
-      .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
-      .unique();
-
-    if (!user) {
-      throw new Error("User not found");
-    }
-
     const book = await ctx.db.get(args.id);
-    if (!book || book.userId !== user._id) {
+    if (!book || book.userId !== userId) {
       throw new Error("Book not found or not authorized");
     }
 
@@ -226,17 +182,8 @@ export const listBooks = query({
     status: v.optional(bookStatus),
   },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {
-      return [];
-    }
-
-    const user = await ctx.db
-      .query("users")
-      .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
-      .unique();
-
-    if (!user) {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) {
       return [];
     }
 
@@ -244,7 +191,7 @@ export const listBooks = query({
       return await ctx.db
         .query("library")
         .withIndex("by_user_and_status", (q) =>
-          q.eq("userId", user._id).eq("status", args.status!)
+          q.eq("userId", userId).eq("status", args.status!)
         )
         .order("desc")
         .collect();
@@ -252,7 +199,7 @@ export const listBooks = query({
 
     return await ctx.db
       .query("library")
-      .withIndex("by_user", (q) => q.eq("userId", user._id))
+      .withIndex("by_user", (q) => q.eq("userId", userId))
       .order("desc")
       .collect();
   },
@@ -263,24 +210,15 @@ export const getBook = query({
     bookId: v.string(),
   },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {
-      return null;
-    }
-
-    const user = await ctx.db
-      .query("users")
-      .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
-      .unique();
-
-    if (!user) {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) {
       return null;
     }
 
     return await ctx.db
       .query("library")
       .withIndex("by_user_and_book", (q) =>
-        q.eq("userId", user._id).eq("bookId", args.bookId)
+        q.eq("userId", userId).eq("bookId", args.bookId)
       )
       .unique();
   },
@@ -289,23 +227,14 @@ export const getBook = query({
 export const getStats = query({
   args: {},
   handler: async (ctx) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {
-      return { wantToRead: 0, reading: 0, read: 0, total: 0 };
-    }
-
-    const user = await ctx.db
-      .query("users")
-      .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
-      .unique();
-
-    if (!user) {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) {
       return { wantToRead: 0, reading: 0, read: 0, total: 0 };
     }
 
     const allBooks = await ctx.db
       .query("library")
-      .withIndex("by_user", (q) => q.eq("userId", user._id))
+      .withIndex("by_user", (q) => q.eq("userId", userId))
       .collect();
 
     const stats = {
