@@ -253,3 +253,92 @@ export const getStats = query({
     return stats;
   },
 });
+
+// Bulk import books from Goodreads CSV
+export const importBooks = mutation({
+  args: {
+    books: v.array(
+      v.object({
+        bookId: v.string(),
+        title: v.string(),
+        author: v.optional(v.string()),
+        coverUrl: v.optional(v.string()),
+        status: bookStatus,
+        rating: v.optional(v.number()),
+        dateRead: v.optional(v.number()),
+        dateAdded: v.optional(v.number()),
+      })
+    ),
+  },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) {
+      throw new Error("Not authenticated");
+    }
+
+    const results = {
+      imported: 0,
+      skipped: 0,
+      errors: [] as string[],
+    };
+
+    for (const book of args.books) {
+      try {
+        // Check if book already exists in library
+        const existingBook = await ctx.db
+          .query("library")
+          .withIndex("by_user_and_book", (q) =>
+            q.eq("userId", userId).eq("bookId", book.bookId)
+          )
+          .unique();
+
+        if (existingBook) {
+          results.skipped++;
+          continue;
+        }
+
+        const now = Date.now();
+        const bookData: {
+          userId: typeof userId;
+          bookId: string;
+          title: string;
+          author?: string;
+          coverUrl?: string;
+          status: "want_to_read" | "reading" | "read";
+          rating?: number;
+          startedAt?: number;
+          finishedAt?: number;
+          createdAt: number;
+          updatedAt: number;
+        } = {
+          userId,
+          bookId: book.bookId,
+          title: book.title,
+          author: book.author,
+          coverUrl: book.coverUrl,
+          status: book.status,
+          createdAt: book.dateAdded || now,
+          updatedAt: now,
+        };
+
+        if (book.rating && book.rating >= 1 && book.rating <= 5) {
+          bookData.rating = book.rating;
+        }
+
+        if (book.status === "reading") {
+          bookData.startedAt = book.dateAdded || now;
+        } else if (book.status === "read") {
+          bookData.startedAt = book.dateAdded || now;
+          bookData.finishedAt = book.dateRead || now;
+        }
+
+        await ctx.db.insert("library", bookData);
+        results.imported++;
+      } catch (error) {
+        results.errors.push(`Failed to import "${book.title}": ${error}`);
+      }
+    }
+
+    return results;
+  },
+});

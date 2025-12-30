@@ -9,6 +9,7 @@ import { cn } from '~/lib/utils'
 import { WavyLinesBackground } from '~/components/ui/wavy-lines'
 import { SignInForm } from '~/components/SignInForm'
 import { SignUpForm } from '~/components/SignUpForm'
+import { GoodreadsImport } from '~/components/GoodreadsImport'
 
 export const Route = createFileRoute('/library')({
   component: LibraryPage,
@@ -95,6 +96,9 @@ function LibraryContent() {
         <p className="mt-3 text-content-fg/70">
           Track your reading journey
         </p>
+        <div className="mt-4">
+          <GoodreadsImport />
+        </div>
       </div>
 
       {/* Stats */}
